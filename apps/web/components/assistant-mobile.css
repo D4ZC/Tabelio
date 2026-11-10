@@ -1,0 +1,179 @@
+/* The assistant keeps the same capabilities in a focused conversation workspace. */
+.ai-assistant .ai-panel { background: #f9faf7; }
+.ai-assistant .ai-header { flex: 0 0 auto; }
+.ai-assistant .ai-header-actions button { display: grid; place-items: center; }
+.ai-assistant .ai-header-actions svg { width: 18px; height: 18px; }
+.ai-assistant .ai-context-home { display: none; }
+.ai-assistant .ai-document-options { margin: 0 0 10px; }
+.ai-assistant .ai-document-options > summary { display: flex; align-items: center; gap: 7px; min-height: 32px; cursor: pointer; list-style: none; color: #68786f; font-size: 11px; }
+.ai-assistant .ai-document-options > summary::-webkit-details-marker { display: none; }
+.ai-assistant .ai-document-options > summary > svg { width: 15px; height: 15px; }
+.ai-assistant .ai-document-options > summary > strong { margin-left: auto; padding: 4px 7px; border-radius: 5px; color: #40644f; background: #eef4ec; font-size: 10px; font-weight: 650; }
+.ai-assistant .ai-document-options[open] > summary { margin-bottom: 8px; }
+.ai-assistant .ai-options-chevron { margin-left: 3px; font-size: 15px; }
+.ai-assistant .ai-document-options[open] .ai-options-chevron { transform: rotate(180deg); }
+.ai-assistant .ai-document-options > summary:focus-visible { outline: 3px solid var(--lime); outline-offset: 2px; border-radius: 5px; }
+.ai-assistant .ai-messages { min-height: 0; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: #d3ded4 transparent; }
+.ai-assistant .ai-messages-welcome { padding-top: 14px; }
+.ai-welcome { flex: 1 0 auto; width: 100%; max-width: 490px; margin: auto; padding: 12px 10px 8px; text-align: center; }
+.ai-welcome-emblem { position: relative; display: grid; place-items: center; width: 70px; height: 70px; margin: 0 auto 20px; border: 1px solid #d6e3ca; border-radius: 22px; background: #eaf1df; color: var(--forest); box-shadow: inset 0 1px 1px #fff, 0 10px 30px #173f3109; transform: rotate(-7deg); }
+.ai-welcome-emblem > svg { width: 33px; height: 33px; transform: rotate(7deg); fill: #cde981; stroke-width: 1.15; }
+.ai-welcome-emblem > span { position: absolute; width: 13px; height: 13px; background: #cde981; border: 3px solid #f9faf7; border-radius: 50%; right: -6px; top: 5px; }
+.ai-welcome-emblem > i { position: absolute; width: 4px; height: 4px; background: #90ae6e; border-radius: 50%; left: -13px; bottom: 8px; }
+.ai-welcome-eyebrow { display: block; color: #6b806a; font-size: 9px; font-weight: 750; letter-spacing: .16em; }
+.ai-welcome h1 { margin: 12px 0 11px; color: #203e30; font: 400 clamp(28px, 3vw, 40px)/1.12 Georgia, 'Times New Roman', serif; letter-spacing: -.035em; }
+.ai-welcome h1 em { color: #6e8660; font-weight: 400; }
+.ai-welcome > p { margin: 0; color: #7b857c; font-size: 12px; line-height: 1.65; }
+.ai-welcome-prompts { display: grid; gap: 8px; margin: 25px 0 17px; text-align: left; }
+.ai-welcome-prompts button { display: flex; align-items: center; width: 100%; min-height: 63px; gap: 12px; padding: 11px 14px; border: 1px solid #e2e8dc; border-radius: 13px; color: #294c39; background: #ffffffbd; text-align: left; cursor: pointer; box-shadow: 0 2px 3px #173f3102; transition: border-color .15s, background .15s; }
+.ai-welcome-prompts button:hover { border-color: #a8c180; background: #f4f8ef; }
+.ai-welcome-prompts button:focus-visible { outline: 3px solid var(--lime); outline-offset: 2px; }
+.ai-welcome-prompts button:disabled { opacity: .5; cursor: wait; }
+.ai-welcome-prompts button > span:nth-child(2) { min-width: 0; flex: 1; }
+.ai-welcome-prompts strong, .ai-welcome-prompts small { display: block; }
+.ai-welcome-prompts strong { font-size: 12px; font-weight: 650; }
+.ai-welcome-prompts small { margin-top: 4px; color: #859080; font-size: 10px; font-weight: 400; }
+.ai-welcome-prompts button > svg { flex-shrink: 0; width: 16px; height: 16px; color: #8a9a7f; }
+.ai-prompt-icon { display: grid; flex: 0 0 34px; place-items: center; width: 34px; height: 34px; border: 1px solid #e4ebdc; background: #f0f4e9; border-radius: 9px; }
+.ai-prompt-icon svg { width: 18px; height: 18px; }
+.ai-welcome-prompts button:nth-child(2) .ai-prompt-icon { background: #edf2ef; color: #53746b; }
+.ai-welcome-prompts button:nth-child(3) .ai-prompt-icon { background: #f7f1e5; color: #a38b52; border-color: #eee6d6; }
+.ai-welcome-note { display: flex; align-items: center; justify-content: center; gap: 5px; color: #97a08f; font-size: 9px; }
+.ai-welcome-note svg { width: 12px; height: 12px; }
+.ai-assistant .ai-attach svg, .ai-assistant .ai-mic svg, .ai-assistant .ai-send svg { width: 18px; height: 18px; }
+.ai-assistant .ai-listening-status { display: flex; align-items: center; justify-content: center; gap: 4px; margin-top: 9px; color: #a53c3c; font-size: 10px; }
+.ai-listening-status > span { display: block; width: 2px; height: 8px; background: currentColor; border-radius: 2px; }
+.ai-listening-status > span:nth-child(2), .ai-listening-status > span:nth-child(4) { height: 13px; }
+.ai-listening-status > span:nth-child(3) { height: 18px; margin-right: 0; }
+.ai-listening-status > span:last-of-type { margin-right: 5px; }
+.ai-assistant .ai-budget-toggle-title { display: grid; gap: 4px; }
+.ai-assistant .ai-budget-compact-amount { color: #7b8879; font-size: 10px; font-weight: 450; letter-spacing: 0; }
+.ai-assistant .ai-budget-compact-amount b { color: #39583b; font-weight: 650; }
+.ai-assistant .ai-budget-snapshot-note { display: block; margin-top: 5px; color: #8b7048; font-size: 10px; line-height: 1.5; }
+
+@media (min-width: 761px) {
+  .ai-assistant.ai-assistant-page { padding: 24px clamp(22px, 3vw, 48px); background: #f1f4ed; }
+  .ai-assistant.ai-assistant-page .ai-panel-page { max-width: 1300px; margin-inline: auto; border-radius: 20px; border-color: #dce4d7; box-shadow: 0 10px 50px #173f3108; }
+  .ai-assistant-page .ai-header { min-height: 78px; padding-inline: 25px; }
+  .ai-assistant-page .ai-messages { padding-inline: clamp(24px, 4vw, 70px); }
+  .ai-assistant-page .ai-message p, .ai-assistant-page .ai-markdown { font-size: 14px; line-height: 1.7; }
+  .ai-assistant-page .ai-composer { padding-inline: clamp(24px, 4vw, 70px); }
+  .ai-assistant-page .ai-composer textarea { font-size: 14px; }
+  .ai-assistant-page .ai-composer-input { min-height: 68px; grid-template-columns: 40px minmax(0, 1fr) 40px 40px; gap: 9px; padding: 8px; }
+  .ai-assistant-page .ai-attach, .ai-assistant-page .ai-mic, .ai-assistant-page .ai-send { width: 40px; height: 40px; }
+  .ai-assistant-page .ai-budget { padding-inline: 25px; }
+  .ai-assistant:not(.ai-assistant-page):not(.is-expanded) .ai-welcome { padding-inline: 6px; }
+  .ai-assistant:not(.ai-assistant-page):not(.is-expanded) .ai-welcome-emblem { width: 48px; height: 48px; margin-bottom: 12px; border-radius: 15px; }
+  .ai-assistant:not(.ai-assistant-page):not(.is-expanded) .ai-welcome-emblem > svg { width: 26px; height: 26px; }
+  .ai-assistant:not(.ai-assistant-page):not(.is-expanded) .ai-welcome h1 { font-size: 25px; }
+  .ai-assistant:not(.ai-assistant-page):not(.is-expanded) .ai-welcome-prompts { margin-top: 18px; }
+}
+
+@media (max-width: 760px) {
+  .ai-assistant.ai-assistant-page {
+    inset: var(--mobile-header-height, 64px) 0 auto;
+    height: calc(var(--assistant-viewport-height, 100dvh) - var(--mobile-header-height, 64px) - var(--mobile-nav-height, 72px));
+    padding: 0; z-index: 80; background: #f8faf6;
+  }
+  .ai-assistant.ai-assistant-page .ai-panel-page { border: 0; border-radius: 0; height: 100%; box-shadow: none; background: #f8faf6; }
+  .ai-assistant .ai-launcher { display: none; }
+  .ai-assistant .ai-header { min-height: 68px; padding: 12px 18px; gap: 10px; background: #f8faf6; color: #203e30; border-bottom: 0; grid-template-columns: 38px minmax(0, 1fr) auto; }
+  .ai-assistant .ai-header .ai-avatar { width: 38px; height: 38px; border-radius: 12px; border: 1px solid #dde7d0; color: #315438; background: #eaf1df; }
+  .ai-assistant .ai-header .ai-avatar svg { width: 21px; height: 21px; fill: #cde981; stroke-width: 1.3; }
+  .ai-assistant .ai-header strong { font: 650 15px/1.2 -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; letter-spacing: -.02em; }
+  .ai-assistant .ai-header span { margin-top: 5px; color: #85907d; font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ai-assistant .ai-header span i { width: 5px; height: 5px; margin-right: 3px; background: #97b56c; box-shadow: none; }
+  .ai-assistant .ai-header-actions { gap: 0; }
+  .ai-assistant .ai-header-actions button { width: 40px; height: 44px; color: #698062; background: transparent; border-radius: 10px; font-size: 20px; }
+  .ai-assistant .ai-header-actions button:hover { background: #eaf0e3; color: #315438; }
+  .ai-assistant .ai-header-actions button:disabled { opacity: .3; }
+  .ai-assistant .ai-budget { margin: 0 18px; padding: 0 0 10px; background: transparent; border-bottom: 1px solid #e4eadf; }
+  .ai-assistant .ai-budget.is-collapsed { padding: 0 0 10px; }
+  .ai-assistant .ai-budget-toggle { min-height: 49px; padding: 8px 11px; margin: 0; border: 1px solid #e1e8d8; border-radius: 10px; background: #eff4e8; font-size: 11px; font-weight: 650; }
+  .ai-assistant .ai-budget-toggle-action { font-size: 10px; color: #647957; }
+  .ai-assistant .ai-budget-content { position: absolute; z-index: 10; top: calc(100% - 1px); left: -5px; right: -5px; max-height: min(58dvh, 470px); overflow-y: auto; overscroll-behavior: contain; padding: 16px; border: 1px solid #dce5d3; border-radius: 0 0 15px 15px; background: #f6f9f2; box-shadow: 0 18px 28px #203e3024; }
+  .ai-assistant .ai-budget-content[hidden] { display: none; }
+  .ai-assistant .ai-budget-grid { gap: 16px; }
+  .ai-assistant .ai-budget-metric > span { font-size: 10px; }
+  .ai-assistant .ai-budget-metric > strong { font-size: 16px; letter-spacing: -.03em; }
+  .ai-assistant .ai-budget-metric > small { font-size: 10px; white-space: normal; }
+  .ai-assistant .ai-budget-footer { align-items: flex-start; margin-top: 15px; padding-top: 10px; }
+  .ai-assistant .ai-budget-footer > span { font-size: 10px; }
+  .ai-assistant .ai-budget-footer button { min-height: 44px; font-size: 11px; }
+  .ai-assistant .ai-budget-actions { flex-wrap: wrap; gap: 8px; }
+  .ai-assistant .ai-budget-detail, .ai-assistant .ai-budget-installation { position: static; max-height: none; margin: 10px -3px 0; padding: 12px 0 0; border: 0; border-top: 1px solid #dde6d3; box-shadow: none; background: transparent; }
+  .ai-assistant .ai-budget-connection { margin-top: 10px; font-size: 11px; line-height: 1.6; }
+  .ai-assistant .ai-budget-connection-actions { gap: 8px 18px; }
+  .ai-assistant .ai-budget-connection-actions a, .ai-assistant .ai-budget-connection-actions button { display: inline-flex; align-items: center; min-height: 44px; }
+  .ai-assistant .ai-budget-note, .ai-assistant .ai-budget-official > div, .ai-assistant .ai-budget-breakdown, .ai-assistant .ai-budget-operations strong { font-size: 11px; }
+  .ai-assistant .ai-budget-operations span, .ai-assistant .ai-budget-operation-usage { font-size: 10px; }
+  .ai-assistant .ai-context-bar { min-height: 33px; padding-inline: 18px; border: 0; background: transparent; }
+  .ai-assistant .ai-context-home { display: none; }
+  .ai-assistant .ai-messages { padding: 20px 18px 16px; gap: 20px; }
+  .ai-assistant .ai-messages-welcome { padding: 0 18px 12px; }
+  .ai-welcome { max-width: 440px; padding: 18px 1px 4px; }
+  .ai-welcome-emblem { width: 58px; height: 58px; border-radius: 19px; margin-bottom: 17px; }
+  .ai-welcome-emblem > svg { width: 29px; height: 29px; }
+  .ai-welcome h1 { margin-top: 11px; font-size: clamp(29px, 8.6vw, 39px); line-height: 1.1; }
+  .ai-welcome > p { font-size: 12px; line-height: 1.6; }
+  .ai-welcome-prompts { margin: 22px 0 16px; gap: 8px; }
+  .ai-welcome-prompts button { min-height: 61px; border-radius: 12px; padding: 10px 12px; }
+  .ai-welcome-prompts strong { font-size: 12px; }
+  .ai-welcome-prompts small { font-size: 10px; }
+  .ai-assistant .ai-message { max-width: 97%; gap: 8px; }
+  .ai-assistant .ai-message-assistant { max-width: 100%; }
+  .ai-assistant .ai-message-mark { width: 23px; height: 26px; border-radius: 8px; background: #eaf1df; }
+  .ai-assistant .ai-message-assistant > div { padding: 0; border: 0; background: transparent; box-shadow: none; }
+  .ai-assistant .ai-message p, .ai-assistant .ai-markdown { font-size: 14px; line-height: 1.7; }
+  .ai-assistant .ai-message-user > div { padding: 13px 16px; border-radius: 17px 17px 4px 17px; background: #274e3a; }
+  .ai-assistant .ai-markdown h1 { font-size: 22px; }.ai-assistant .ai-markdown h2 { font-size: 19px; }.ai-assistant .ai-markdown h3 { font-size: 16px; }
+  .ai-assistant .ai-markdown-table th, .ai-assistant .ai-markdown-table td { padding: 9px; font-size: 12px; }
+  .ai-assistant .ai-confirmation { padding: 14px; border-radius: 12px; }
+  .ai-assistant .ai-confirmation > strong { font-size: 14px; }
+  .ai-assistant .ai-confirmation > p { font-size: 12px; }
+  .ai-assistant .ai-confirmation summary { min-height: 44px; display: flex; align-items: center; font-size: 12px; }
+  .ai-assistant .ai-confirmation-actions .button, .ai-assistant .ai-continuation-actions .button, .ai-assistant .ai-document-download .button { min-height: 44px; padding: 10px 14px; font-size: 12px; }
+  .ai-assistant .ai-composer { flex: 0 0 auto; max-height: 46dvh; overflow-y: auto; padding: 6px 16px 10px; border-top: 1px solid #e4eade; background: #fdfefa; }
+  .ai-assistant .ai-document-options { margin: 0 2px 5px; }
+  .ai-assistant .ai-document-options > summary { min-height: 35px; font-size: 10px; }
+  .ai-assistant .ai-reading-mode button { min-height: 44px; font-size: 12px; }
+  .ai-assistant .ai-reading-mode-hint { font-size: 11px; line-height: 1.5; }
+  .ai-assistant .ai-composer-input { min-height: 60px; padding: 7px 6px; gap: 3px; grid-template-columns: 36px minmax(0, 1fr) 40px 40px; border-radius: 17px; border-color: #dfe7d8; background: white; box-shadow: 0 3px 7px #173f3103; }
+  .ai-assistant .ai-composer textarea { min-height: 43px; max-height: 110px; padding: 10px 2px; font-size: 16px; line-height: 1.45; }
+  .ai-assistant .ai-composer textarea::placeholder { color: #a0aa98; }
+  .ai-assistant .ai-attach, .ai-assistant .ai-mic, .ai-assistant .ai-send { width: 40px; height: 44px; border-radius: 12px; }
+  .ai-assistant .ai-attach { width: 36px; color: #839277; background: transparent; }
+  .ai-assistant .ai-mic { color: #4f6b43; background: #eef4e7; }
+  .ai-assistant .ai-mic.is-listening { color: white; background: #a53c3c; }
+  .ai-assistant .ai-send { background: #234b36; border-radius: 12px; }
+  .ai-assistant .ai-send:disabled { opacity: 1; background: #e9eee1; color: #a4b095; }
+  .ai-assistant .ai-composer > small { margin-top: 8px; font-size: 9px; color: #9ba48f; }
+  .ai-assistant .ai-voice-error { margin-block: 8px; font-size: 11px; line-height: 1.5; }
+  .ai-assistant .ai-attachments { max-height: 100px; overflow-y: auto; }
+  .ai-assistant .ai-attachments button { height: 44px; flex-basis: 44px; }
+  .ai-assistant .ai-document-preview { font-size: 12px; }
+  .ai-assistant .ai-document-preview summary { min-height: 44px; }
+  html[data-mobile-keyboard] .mobile-bottom-nav { display: none; }
+  html[data-mobile-keyboard] .ai-assistant.ai-assistant-page { height: calc(var(--assistant-viewport-height, 100dvh) - var(--mobile-header-height, 64px)); }
+  html[data-mobile-keyboard] .ai-assistant .ai-composer > small { display: none; }
+}
+
+@media (max-width: 760px) and (max-height: 740px) {
+  .ai-welcome { padding-top: 13px; }
+  .ai-welcome-emblem { width: 44px; height: 44px; border-radius: 15px; margin-bottom: 12px; }
+  .ai-welcome-emblem > svg { width: 24px; height: 24px; }
+  .ai-welcome h1 { font-size: 29px; }
+  .ai-welcome-prompts { margin-top: 16px; }
+  .ai-welcome-prompts button { min-height: 55px; padding-block: 8px; }
+}
+
+@media (max-width: 760px) {
+  .app-frame-assistant .main-content { height: calc(100dvh - var(--mobile-header-height) - var(--mobile-nav-height)); }
+  .app-frame-assistant .assistant-page-fallback { min-height: 0; height: 100%; }
+  .ai-welcome { padding-top: 15px; }
+  .ai-welcome-emblem { width: 48px; height: 48px; border-radius: 16px; margin-bottom: 13px; }
+  .ai-welcome-emblem > svg { width: 26px; height: 26px; }
+  .ai-welcome h1 { margin-block: 10px; }
+  .ai-welcome-prompts { margin: 16px 0 12px; gap: 7px; }
+  .ai-welcome-prompts button { min-height: 55px; padding-block: 8px; }
+}

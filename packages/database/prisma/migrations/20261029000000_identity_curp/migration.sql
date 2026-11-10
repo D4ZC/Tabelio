@@ -1,0 +1,1 @@
+ALTER TABLE "Person" ADD COLUMN "curp" TEXT;

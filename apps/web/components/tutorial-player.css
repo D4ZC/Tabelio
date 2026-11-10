@@ -1,0 +1,52 @@
+.tutorial-player { position: sticky; top: 16px; align-self: start; display: grid; gap: 15px; width: 100%; max-height: calc(100dvh - 32px); overflow: auto; padding: 23px; color: var(--ink); background: #fff; border: 1px solid #d6e2d9; border-radius: 18px; box-shadow: 0 14px 40px #173f3110; scrollbar-width: thin; }
+.tutorial-player button, .tutorial-player select { min-height: 38px; border-radius: 8px; font-size: 11px; }
+.tutorial-player button { padding: 8px 10px; color: var(--forest); border: 1px solid var(--line); background: white; cursor: pointer; font-weight: 750; }
+.tutorial-player button:hover:not(:disabled) { background: #f0f7f2; border-color: #b4cdbd; }
+.tutorial-player button:disabled { cursor: default; opacity: .45; }
+.tutorial-player :focus-visible { outline: 3px solid #b6d86a; outline-offset: 3px; }
+.tutorial-player-topline { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.tutorial-player-topline > span { color: var(--forest-2); font-size: 10px; font-weight: 850; letter-spacing: .09em; text-transform: uppercase; }
+.tutorial-player-topline .tutorial-player-exit { min-height: 30px; padding: 4px 7px; border: 0; color: var(--muted); }
+.tutorial-player-chapters, .tutorial-player-settings label { display: grid; gap: 6px; font-size: 10px; font-weight: 750; color: var(--muted); }
+.tutorial-player select { width: 100%; max-width: 100%; padding: 8px; border: 1px solid #d9e3dc; background: #fbfdfb; color: var(--ink); }
+.tutorial-player-step-meta { display: flex; align-items: center; justify-content: space-between; color: var(--muted); font-size: 10px; }
+.tutorial-player-overall, .tutorial-player-countdown { overflow: hidden; height: 5px; border-radius: 50px; background: #edf2ed; }
+.tutorial-player-overall { margin-top: -7px; }
+.tutorial-player-overall span, .tutorial-player-countdown span { display: block; height: 100%; background: var(--forest-2); border-radius: inherit; transition: width .1s linear; }
+.tutorial-player-explanation h2 { margin: 0 0 10px; font-size: 21px; line-height: 1.25; color: var(--forest); }
+.tutorial-player-explanation h2:focus { outline: 2px solid #8ba870; outline-offset: 5px; border-radius: 2px; }
+.tutorial-player-explanation > p, .tutorial-player-instruction p { margin: 0; font-size: 12px; line-height: 1.7; }
+.tutorial-player-explanation > p { color: #55645b; }
+.tutorial-player-instruction { margin-top: 14px; padding: 12px; color: var(--forest); background: #edf6ef; border-radius: 10px; }
+.tutorial-player-instruction strong { display: block; margin-bottom: 5px; color: #33654a; font-size: 9px; text-transform: uppercase; letter-spacing: .08em; }
+.tutorial-player-completed { display: flex; gap: 9px; padding: 11px; color: #235439; background: #f2f8ed; border: 1px solid #d8e9c9; border-radius: 10px; }
+.tutorial-player-completed > span { display: grid; place-items: center; flex: 0 0 21px; width: 21px; height: 21px; color: white; background: #427753; border-radius: 50%; font-weight: 900; }
+.tutorial-player-completed strong { font-size: 10px; }
+.tutorial-player-completed p { margin: 4px 0 0; font-size: 11px; line-height: 1.6; }
+.tutorial-player-problem { margin: 0; padding: 9px 11px; color: #7b551e; background: #fff4dd; border-radius: 8px; font-size: 11px; line-height: 1.5; }
+.tutorial-player-settings { display: grid; grid-template-columns: 1.35fr 1fr; gap: 9px; }
+.tutorial-player-audio { display: flex; align-items: start; gap: 8px; color: var(--forest); font-size: 11px; font-weight: 750; }
+.tutorial-player-audio input { width: 15px; height: 15px; margin-top: 1px; accent-color: var(--forest); }
+.tutorial-player-audio small { display: block; margin-top: 3px; color: var(--muted); font-size: 9px; line-height: 1.5; font-weight: 450; }
+.tutorial-player-timing p { margin: 0 0 7px; color: #607165; font-size: 10px; line-height: 1.5; }
+.tutorial-player-countdown { height: 3px; }
+.tutorial-player-countdown span { background: #a8c969; }
+.tutorial-player-main-controls { display: grid; grid-template-columns: 1fr 1fr 1.1fr; gap: 6px; }
+.tutorial-player-main-controls .tutorial-player-next { color: white; background: var(--forest); border-color: var(--forest); }
+.tutorial-player-main-controls .tutorial-player-next:hover:not(:disabled) { color: white; background: var(--forest-2); }
+.tutorial-player-main-controls .tutorial-player-pause { color: var(--forest); background: #e9f3ea; border-color: #d6e5d9; }
+.tutorial-player-skip-controls { display: flex; justify-content: space-between; gap: 10px; }
+.tutorial-player-skip-controls button { min-height: 26px; padding: 1px; color: var(--muted); border: 0; font-size: 10px; font-weight: 600; }
+.tutorial-player-help { margin: -3px 0 0; padding-top: 11px; color: #879188; border-top: 1px solid var(--line); font-size: 9px; line-height: 1.6; }
+.tutorial-player-pointer-layer { position: fixed; z-index: 45; inset: 0; overflow: hidden; pointer-events: none; }
+.tutorial-player-target { position: absolute; border: 2px solid #83ab4c; border-radius: 12px; box-shadow: 0 0 0 5px #a8cf7326; transition: left .6s ease, top .6s ease, width .4s ease, height .4s ease, border-color .3s ease; }
+.tutorial-player-target.is-complete { border-color: #4d8b61; box-shadow: 0 0 0 5px #4d8b611c; }
+.tutorial-player-cursor { position: absolute; width: 30px; height: 38px; filter: drop-shadow(0 3px 3px #173f3140); transition: left .9s cubic-bezier(.2,.65,.3,1), top .9s cubic-bezier(.2,.65,.3,1); }
+.tutorial-player-cursor svg { position: relative; z-index: 1; }
+.tutorial-player-click-ring { position: absolute; left: -13px; top: -13px; width: 30px; height: 30px; border: 3px solid #73a43e; border-radius: 50%; opacity: 0; }
+.tutorial-player-cursor.is-clicking .tutorial-player-click-ring { animation: tutorial-player-click .65s ease-out; }
+@keyframes tutorial-player-click { from { opacity: 1; transform: scale(.4); } to { opacity: 0; transform: scale(2.2); } }
+.tutorial-player-pointer-layer.is-reduced-motion *, .tutorial-player-pointer-layer.is-reduced-motion *::before { transition: none !important; animation: none !important; }
+@media (max-width: 1120px) { .tutorial-player { padding: 17px; gap: 12px; } .tutorial-player-explanation h2 { font-size: 18px; } .tutorial-player-settings { grid-template-columns: 1fr; } }
+@media (max-width: 1000px) { .tutorial-player { position: relative; top: 0; max-height: none; padding: 18px; } .tutorial-player-settings { grid-template-columns: 1.35fr 1fr; } .tutorial-player-explanation h2 { font-size: 21px; } }
+@media (prefers-reduced-motion: reduce) { .tutorial-player-overall span, .tutorial-player-countdown span, .tutorial-player-target, .tutorial-player-cursor { transition: none; } .tutorial-player-cursor.is-clicking .tutorial-player-click-ring { animation: none; } }

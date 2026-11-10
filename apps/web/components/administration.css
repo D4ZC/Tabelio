@@ -1,0 +1,46 @@
+.administration-breadcrumb { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 26px; color: #899286; font-size: 11px; line-height: 1.5; }
+.administration-breadcrumb a { color: #526e46; text-decoration: underline; text-underline-offset: 3px; }
+.administration-breadcrumb [aria-current] { color: var(--forest); font-weight: 650; }
+.administration-breadcrumb a:focus-visible, .administration-secondary-link:focus-visible, .administration-return a:focus-visible { outline: 3px solid var(--lime); outline-offset: 4px; border-radius: 4px; }
+.administration-header { align-items: center; }
+.administration-header > div { max-width: 630px; }
+.administration-header p { line-height: 1.65; }
+.administration-role { flex-shrink: 0; padding: 8px 12px; border: 1px solid #dce6d2; border-radius: 8px; color: #6c805b; background: #edf3e5; font-size: 10px; font-weight: 650; }
+.administration-intro { display: flex; align-items: center; gap: 21px; margin-bottom: 26px; padding: 27px 29px; border: 1px solid #dce5d4; border-radius: 17px; background: #ecf2e5; }
+.administration-intro-mark { display: grid; place-items: center; flex: 0 0 49px; width: 49px; height: 54px; border-radius: 14px 5px 14px 5px; color: var(--lime); background: var(--forest); font: italic 34px Georgia, serif; }
+.administration-intro h2 { margin: 0 0 7px; color: var(--forest); font: 500 23px/1.2 Georgia, serif; }
+.administration-intro p { max-width: 730px; margin: 0; color: #77836b; font-size: 12px; line-height: 1.7; }
+.administration-setup-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+.administration-setup-card { display: flex; flex-direction: column; min-width: 0; padding: 30px; border: 1px solid #e0e7d9; border-radius: 17px; background: #fff; }
+.administration-step { display: flex; align-items: center; gap: 11px; color: #66804e; font-size: 12px; font-weight: 750; letter-spacing: .05em; }
+.administration-step > span { font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+.administration-setup-card h2 { margin: 24px 0 12px; color: #244731; font: 500 clamp(24px, 2.4vw, 31px)/1.15 Georgia, serif; letter-spacing: -.025em; }
+.administration-setup-card > p { margin: 0; color: #7c8575; font-size: 13px; line-height: 1.7; }
+.administration-setup-card ul { display: grid; gap: 12px; margin: 24px 0 28px; padding: 0; color: #53664b; list-style: none; font-size: 12px; line-height: 1.6; }
+.administration-setup-card li { position: relative; padding-left: 20px; }
+.administration-setup-card li::before { content: '✓'; position: absolute; left: 0; color: #91a770; }
+.administration-card-actions { display: grid; justify-items: start; gap: 13px; margin-top: auto; }
+.administration-card-actions .button { gap: 24px; min-height: 44px; padding-inline: 18px; }
+.administration-secondary-link { min-height: 32px; display: inline-flex; align-items: center; color: #6d805e; font-size: 11px; text-decoration: underline; text-underline-offset: 3px; }
+.administration-card-actions small { display: inline-flex; align-items: center; min-height: 32px; color: #929b8a; font-size: 10px; line-height: 1.5; }
+.administration-return { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: 24px; padding-block: 18px; border-top: 1px solid #e0e6db; color: #939c8b; font-size: 12px; }
+.administration-return a { display: inline-flex; align-items: center; min-height: 36px; gap: 10px; color: #526e46; font-weight: 650; }
+.administration-access-denied { display: grid; justify-items: start; align-content: center; min-height: min(520px, 65dvh); max-width: 590px; gap: 18px; }
+.administration-access-denied h1 { margin: 0; color: var(--forest); font: 500 clamp(28px, 3vw, 39px)/1.2 Georgia, serif; }
+.administration-access-denied p { margin: 0 0 8px; color: var(--muted); font-size: 14px; line-height: 1.7; }
+@media (max-width: 980px) { .administration-setup-grid { grid-template-columns: 1fr; } }
+@media (max-width: 760px) {
+  .administration-breadcrumb { gap: 7px; margin-bottom: 23px; font-size: 10px; }
+  .administration-header { align-items: flex-start; gap: 14px; }
+  .administration-role { padding: 6px 9px; }
+  .administration-intro { align-items: flex-start; gap: 15px; padding: 21px 18px; border-radius: 15px; }
+  .administration-intro-mark { flex-basis: 37px; width: 37px; height: 42px; border-radius: 11px 4px 11px 4px; font-size: 27px; }
+  .administration-intro h2 { font-size: 21px; }
+  .administration-intro p { font-size: 12px; }
+  .administration-setup-grid { gap: 16px; }
+  .administration-setup-card { padding: 24px 21px; border-radius: 15px; }
+  .administration-setup-card h2 { margin-top: 21px; font-size: 28px; }
+  .administration-setup-card ul { font-size: 12px; }
+  .administration-secondary-link, .administration-card-actions small { min-height: 44px; }
+  .administration-return { flex-wrap: wrap; font-size: 11px; }
+}

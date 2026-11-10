@@ -1,0 +1,1490 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum MembershipRole {
+  ADMIN
+  LAWYER
+  OPERATOR
+  VIEWER
+}
+
+enum PersonType {
+  INDIVIDUAL
+  COMPANY
+}
+
+enum MatterKind {
+  LEASE
+  MEDIATION_AGREEMENT
+}
+
+enum MatterStatus {
+  DRAFT
+  INTEGRATION
+  PENDING_CLIENT
+  VALIDATION
+  READY_TO_DRAFT
+  DRAFTING
+  REVIEW
+  APPROVAL
+  SIGNATURE
+  ACTIVE
+  RENEWAL_DUE
+  TERMINATION
+  CLOSED
+  CANCELLED
+}
+
+enum MatterPartyRole {
+  LANDLORD
+  TENANT
+  GUARANTOR
+  REQUESTING_PARTY
+  COMPLEMENTARY_PARTY
+  FACILITATOR
+  REPRESENTATIVE
+  OTHER
+}
+
+enum ChecklistStatus {
+  PENDING
+  COMPLETE
+  WAIVED
+}
+
+enum RequirementCompletionMode {
+  AUTO
+  MANUAL
+}
+
+enum DocumentType {
+  LANDLORD_ID
+  TENANT_ID
+  GUARANTOR_ID
+  TAX_ID
+  PROOF_OF_ADDRESS
+  PROPERTY_TITLE
+  GUARANTEE_PROPERTY_TITLE
+  LEASE_ANNEX
+  DRAFT_CONTRACT
+  DRAFT_CONTRACT_PDF
+  SIGNED_CONTRACT
+  TERMINATION_EVIDENCE
+  OTHER
+}
+
+enum ExtractionStatus {
+  NOT_REQUESTED
+  MANUAL_REVIEW
+  PROCESSING
+  COMPLETE
+  FAILED
+}
+
+enum ExtractionReviewDecision {
+  CONFIRMED
+  CORRECTED
+  REJECTED
+}
+
+enum PilotCheckpointStatus {
+  PENDING
+  COMPLETE
+}
+
+enum PilotProgramStatus {
+  DRAFT
+  READY
+  ACTIVE
+  PAUSED
+  COMPLETED
+}
+
+enum PilotParticipantStatus {
+  ACTIVE
+  REMOVED
+}
+
+enum PilotValidationResult {
+  PENDING
+  MATCH
+  MISMATCH
+}
+
+enum PilotIssueSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum PilotIssueStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum PilotImportStatus {
+  READY
+  BLOCKED
+  COMMITTED
+  CANCELLED
+}
+
+enum LaunchProgramStatus {
+  DRAFT
+  REVIEW
+  GO
+  NO_GO
+}
+
+enum LaunchTargetEnvironment {
+  LOCAL
+  STAGING
+  PRODUCTION
+}
+
+enum LaunchUatCategory {
+  FUNCTIONAL
+  LEGAL
+  OPERATIONS
+  SECURITY
+  RESILIENCE
+}
+
+enum LaunchUatStatus {
+  PENDING
+  IN_PROGRESS
+  PASSED
+  FAILED
+}
+
+enum LaunchIntegrationKind {
+  OCR
+  SIGNATURE
+  EMAIL
+  CALENDAR
+  PASSWORD_RECOVERY
+}
+
+enum LaunchIntegrationStatus {
+  PENDING
+  SIMULATED
+  VERIFIED
+  BLOCKED
+}
+
+enum LaunchComplianceStatus {
+  PENDING
+  COMPLETE
+}
+
+enum DocumentReviewDecision {
+  CHANGES_REQUESTED
+  LEGAL_APPROVED
+  FINAL_APPROVED
+}
+
+enum SignatureStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+  FAILED
+}
+
+enum TerminationStatus {
+  OPEN
+  COMPLETED
+  CANCELLED
+}
+
+enum ReminderType {
+  RENEWAL
+  MATTER_ASSIGNED
+  TASK_ASSIGNED
+  TASK_ESCALATED
+  TASK_COMMENTED
+}
+
+enum ReminderChannel {
+  IN_APP
+  EMAIL
+  CALENDAR
+}
+
+enum ReminderStatus {
+  SCHEDULED
+  DUE
+  ACKNOWLEDGED
+  CANCELLED
+}
+
+enum ClauseVersionStatus {
+  DRAFT
+  APPROVED
+  RETIRED
+}
+
+enum PortalSubmissionStatus {
+  DRAFT
+  PENDING_REVIEW
+  ACCEPTED
+  REJECTED
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  BLOCKED
+  DONE
+  CANCELLED
+}
+
+enum TaskPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum TaskSource {
+  MANUAL
+  SYSTEM
+}
+
+model Organization {
+  id                        String                     @id @default(cuid())
+  name                      String
+  slug                      String                     @unique
+  createdAt                 DateTime                   @default(now())
+  updatedAt                 DateTime                   @updatedAt
+  memberships               Membership[]
+  people                    Person[]
+  properties                Property[]
+  matters                   Matter[]
+  matterParties             MatterParty[]
+  leaseTerms                LeaseTerms[]
+  mediationTerms            MediationTerms[]
+  checklistItems            ChecklistItem[]
+  documents                 Document[]
+  libraryDocuments          LibraryDocument[]
+  libraryDocumentLinks      LibraryDocumentLink[]
+  auditEvents               AuditEvent[]
+  documentReviews           DocumentReview[]
+  signatureRequests         SignatureRequest[]
+  terminationProcesses      TerminationProcess[]
+  reminders                 Reminder[]
+  clauses                   Clause[]
+  clauseVersions            ClauseVersion[]
+  matterClauseSelections    MatterClauseSelection[]
+  documentClauseSnapshots   DocumentClauseSnapshot[]
+  portalInvitations         PortalInvitation[]
+  portalSubmissions         PortalSubmission[]
+  portalUploads             PortalUpload[]
+  tasks                     Task[]
+  requirementDefinitions    RequirementDefinition[]
+  taskDueDateChanges        TaskDueDateChange[]
+  taskComments              TaskComment[]
+  taskDocumentLinks         TaskDocumentLink[]
+  taskDependencies          TaskDependency[]
+  documentExtractionRuns    DocumentExtractionRun[]
+  documentExtractionReviews DocumentExtractionReview[]
+  pilotCheckpoints          PilotCheckpoint[]
+  pilotPrograms             PilotProgram[]
+  pilotParticipants         PilotParticipant[]
+  pilotValidations          PilotValidation[]
+  pilotIssues               PilotIssue[]
+  pilotImports              PilotImportBatch[]
+  launchPrograms            LaunchProgram[]
+  launchUatCases            LaunchUatCase[]
+  launchIntegrationChecks   LaunchIntegrationCheck[]
+  launchComplianceControls  LaunchComplianceControl[]
+  launchMetricSnapshots     LaunchMetricSnapshot[]
+  aiConversations           AiConversation[]
+  aiOperations              AiOperation[]
+  aiUsageAttempts           AiUsageAttempt[]
+  aiBudgetSnapshots         AiBudgetSnapshot[]
+}
+
+model User {
+  id                        String                     @id @default(cuid())
+  email                     String                     @unique
+  passwordHash              String
+  sessionVersion            Int                        @default(0)
+  failedLoginAttempts       Int                        @default(0)
+  lockedUntil               DateTime?
+  displayName               String
+  active                    Boolean                    @default(true)
+  createdAt                 DateTime                   @default(now())
+  updatedAt                 DateTime                   @updatedAt
+  memberships               Membership[]
+  createdMatters            Matter[]                   @relation("MatterCreator")
+  cancelledMatters          Matter[]                   @relation("MatterCanceller")
+  uploads                   Document[]                 @relation("DocumentUploader")
+  libraryImports            LibraryDocument[]          @relation("LibraryImporter")
+  invalidatedDocuments      Document[]                 @relation("DocumentInvalidator")
+  auditEvents               AuditEvent[]               @relation("AuditActor")
+  documentReviews           DocumentReview[]           @relation("DocumentReviewer")
+  signatureRequests         SignatureRequest[]         @relation("SignatureRequester")
+  signatureCompletions      SignatureRequest[]         @relation("SignatureCompleter")
+  signatureCancellations    SignatureRequest[]         @relation("SignatureCanceller")
+  terminationStarts         TerminationProcess[]       @relation("TerminationStarter")
+  terminationCancellations  TerminationProcess[]       @relation("TerminationCanceller")
+  terminationClosures       TerminationProcess[]       @relation("TerminationCloser")
+  remindersReceived         Reminder[]                 @relation("ReminderRecipient")
+  remindersAcknowledged     Reminder[]                 @relation("ReminderAcknowledger")
+  passwordResetTokens       PasswordResetToken[]
+  clausesCreated            Clause[]                   @relation("ClauseCreator")
+  clauseVersionsCreated     ClauseVersion[]            @relation("ClauseVersionCreator")
+  clauseVersionsApproved    ClauseVersion[]            @relation("ClauseVersionApprover")
+  clauseSelections          MatterClauseSelection[]    @relation("ClauseSelector")
+  portalInvitationsCreated  PortalInvitation[]         @relation("PortalInvitationCreator")
+  portalSubmissionsReviewed PortalSubmission[]         @relation("PortalSubmissionReviewer")
+  tasksCreated              Task[]                     @relation("TaskCreator")
+  tasksCompleted            Task[]                     @relation("TaskCompleter")
+  tasksBlocked              Task[]                     @relation("TaskBlocker")
+  taskDueDateChanges        TaskDueDateChange[]        @relation("TaskDueDateChanger")
+  taskComments              TaskComment[]              @relation("TaskCommentAuthor")
+  taskDocumentLinks         TaskDocumentLink[]         @relation("TaskDocumentLinker")
+  taskDependenciesCreated   TaskDependency[]           @relation("TaskDependencyCreator")
+  extractionRunsRequested   DocumentExtractionRun[]    @relation("ExtractionRequester")
+  extractionReviews         DocumentExtractionReview[] @relation("ExtractionReviewer")
+  pilotCheckpointsCompleted PilotCheckpoint[]          @relation("PilotCheckpointCompleter")
+  pilotParticipantsAdded    PilotParticipant[]         @relation("PilotParticipantAdder")
+  pilotTrainingsConfirmed   PilotParticipant[]         @relation("PilotTrainingConfirmer")
+  pilotValidations          PilotValidation[]          @relation("PilotValidator")
+  pilotIssuesReported       PilotIssue[]               @relation("PilotIssueReporter")
+  pilotIssuesResolved       PilotIssue[]               @relation("PilotIssueResolver")
+  pilotImportsCreated       PilotImportBatch[]         @relation("PilotImportCreator")
+  pilotImportsCommitted     PilotImportBatch[]         @relation("PilotImportCommitter")
+  launchProgramsCreated     LaunchProgram[]            @relation("LaunchProgramCreator")
+  launchDecisions           LaunchProgram[]            @relation("LaunchProgramDecider")
+  launchUatCasesCreated     LaunchUatCase[]            @relation("LaunchUatCaseCreator")
+  launchUatCasesReviewed    LaunchUatCase[]            @relation("LaunchUatCaseReviewer")
+  launchIntegrationsTested  LaunchIntegrationCheck[]   @relation("LaunchIntegrationTester")
+  launchControlsCompleted   LaunchComplianceControl[]  @relation("LaunchComplianceCompleter")
+  launchMetricsCaptured     LaunchMetricSnapshot[]     @relation("LaunchMetricCapturer")
+  aiConversations           AiConversation[]
+  aiOperations              AiOperation[]
+  aiUsageAttempts           AiUsageAttempt[]
+  aiBudgetSnapshots         AiBudgetSnapshot[]
+}
+
+model Membership {
+  id                     String             @id @default(cuid())
+  organizationId         String
+  userId                 String
+  role                   MembershipRole
+  createdAt              DateTime           @default(now())
+  organization           Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user                   User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  responsibleFor         Matter[]           @relation("MatterResponsible")
+  assignedTasks          Task[]             @relation("TaskAssignee")
+  pilotParticipations    PilotParticipant[]
+  assignedPilotIssues    PilotIssue[]
+  assignedLaunchUatCases LaunchUatCase[]
+
+  @@unique([organizationId, userId])
+  @@index([userId])
+}
+
+model Person {
+  id                        String             @id @default(cuid())
+  organizationId            String
+  type                      PersonType         @default(INDIVIDUAL)
+  legalName                 String
+  givenName                 String?
+  familyName                String?
+  gender                    String?
+  nationality               String?
+  birthPlaceCity            String?
+  birthPlaceState           String?
+  birthPlaceCountry         String?
+  birthDate                 DateTime?
+  maritalStatus             String?
+  occupation                String?
+  taxId                     String?
+  curp                      String?
+  email                     String?
+  phone                     String?
+  addressLine1              String?
+  addressLine2              String?
+  city                      String?
+  state                     String?
+  postalCode                String?
+  country                   String?            @default("México")
+  identificationType        String?
+  identificationNumber      String?
+  notes                     String?
+  createdAt                 DateTime           @default(now())
+  updatedAt                 DateTime           @updatedAt
+  organization              Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  matterParties             MatterParty[]
+  ownedProperties           Property[]         @relation("PropertyOwner")
+  documents                 Document[]
+  portalInvitations         PortalInvitation[] @relation("PortalInvitationPerson")
+  acceptedPortalSubmissions PortalSubmission[] @relation("PortalAcceptedPerson")
+
+  @@index([organizationId, legalName])
+  @@index([organizationId, taxId])
+}
+
+model Property {
+  id                 String       @id @default(cuid())
+  organizationId     String
+  displayName        String
+  useType            String       @default("Casa habitación")
+  addressLine1       String
+  addressLine2       String?
+  neighborhood       String?
+  city               String
+  state              String
+  postalCode         String?
+  country            String       @default("México")
+  cadastralReference String?
+  registryReference  String?
+  ownershipEvidence  String?
+  ownerPersonId      String?
+  notes              String?
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+  organization       Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  owner              Person?      @relation("PropertyOwner", fields: [ownerPersonId], references: [id], onDelete: SetNull)
+  matters            Matter[]     @relation("MatterProperty")
+  guaranteeFor       Matter[]     @relation("GuaranteeProperty")
+  documents          Document[]
+
+  @@index([organizationId, displayName])
+}
+
+model Matter {
+  id                      String                  @id @default(cuid())
+  organizationId          String
+  reference               String
+  title                   String
+  kind                    MatterKind
+  status                  MatterStatus            @default(DRAFT)
+  propertyId              String?
+  guaranteePropertyId     String?
+  linkedMatterId          String?
+  responsibleMembershipId String?
+  createdById             String
+  notes                   String?
+  activatedAt             DateTime?
+  cancelledAt             DateTime?
+  cancellationReason      String?
+  cancelledById           String?
+  createdAt               DateTime                @default(now())
+  updatedAt               DateTime                @updatedAt
+  organization            Organization            @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  property                Property?               @relation("MatterProperty", fields: [propertyId], references: [id], onDelete: SetNull)
+  guaranteeProperty       Property?               @relation("GuaranteeProperty", fields: [guaranteePropertyId], references: [id], onDelete: SetNull)
+  linkedMatter            Matter?                 @relation("LinkedMatter", fields: [linkedMatterId], references: [id], onDelete: SetNull)
+  relatedMatters          Matter[]                @relation("LinkedMatter")
+  responsible             Membership?             @relation("MatterResponsible", fields: [responsibleMembershipId], references: [id], onDelete: SetNull)
+  createdBy               User                    @relation("MatterCreator", fields: [createdById], references: [id])
+  cancelledBy             User?                   @relation("MatterCanceller", fields: [cancelledById], references: [id], onDelete: SetNull)
+  parties                 MatterParty[]
+  leaseTerms              LeaseTerms?
+  mediationTerms          MediationTerms?
+  checklistItems          ChecklistItem[]
+  documents               Document[]
+  auditEvents             AuditEvent[]
+  documentReviews         DocumentReview[]
+  signatureRequests       SignatureRequest[]
+  terminationProcesses    TerminationProcess[]
+  reminders               Reminder[]
+  clauseSelections        MatterClauseSelection[]
+  portalInvitations       PortalInvitation[]
+  portalSubmissions       PortalSubmission[]
+  portalUploads           PortalUpload[]
+  tasks                   Task[]
+  pilotValidations        PilotValidation[]
+  pilotIssues             PilotIssue[]
+  launchUatCases          LaunchUatCase[]
+
+  @@unique([organizationId, reference])
+  @@index([organizationId, status])
+  @@index([organizationId, kind])
+}
+
+model Task {
+  id                   String              @id @default(cuid())
+  organizationId       String
+  matterId             String
+  title                String
+  description          String?
+  status               TaskStatus          @default(TODO)
+  priority             TaskPriority        @default(NORMAL)
+  source               TaskSource          @default(MANUAL)
+  dueAt                DateTime?
+  assigneeMembershipId String?
+  createdById          String?
+  completedById        String?
+  completedAt          DateTime?
+  blockedReason        String?
+  blockedAt            DateTime?
+  blockedById          String?
+  slaEscalationLevel   Int                 @default(0)
+  slaEscalatedAt       DateTime?
+  deduplicationKey     String?
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+  organization         Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  matter               Matter              @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  assignee             Membership?         @relation("TaskAssignee", fields: [assigneeMembershipId], references: [id], onDelete: SetNull)
+  createdBy            User?               @relation("TaskCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  completedBy          User?               @relation("TaskCompleter", fields: [completedById], references: [id], onDelete: SetNull)
+  blockedBy            User?               @relation("TaskBlocker", fields: [blockedById], references: [id], onDelete: SetNull)
+  reminders            Reminder[]
+  dueDateChanges       TaskDueDateChange[]
+  comments             TaskComment[]
+  evidenceLinks        TaskDocumentLink[]
+  prerequisites        TaskDependency[]    @relation("DependentTask")
+  dependents           TaskDependency[]    @relation("PrerequisiteTask")
+  requiresEvidence     Boolean             @default(false)
+
+  @@unique([organizationId, deduplicationKey])
+  @@index([organizationId, status, dueAt])
+  @@index([organizationId, assigneeMembershipId, status])
+  @@index([matterId, status, dueAt])
+  @@index([organizationId, status, blockedAt])
+}
+
+model TaskDueDateChange {
+  id             String       @id @default(cuid())
+  organizationId String
+  taskId         String
+  previousDueAt  DateTime?
+  newDueAt       DateTime
+  reason         String
+  changedById    String
+  createdAt      DateTime     @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  task           Task         @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  changedBy      User         @relation("TaskDueDateChanger", fields: [changedById], references: [id], onDelete: Restrict)
+
+  @@index([organizationId, createdAt])
+  @@index([taskId, createdAt])
+}
+
+model TaskComment {
+  id             String       @id @default(cuid())
+  organizationId String
+  taskId         String
+  body           String
+  authorId       String
+  createdAt      DateTime     @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  task           Task         @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  author         User         @relation("TaskCommentAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+
+  @@index([organizationId, createdAt])
+  @@index([taskId, createdAt])
+}
+
+model TaskDocumentLink {
+  id             String       @id @default(cuid())
+  organizationId String
+  taskId         String
+  documentId     String
+  linkedById     String
+  linkedAt       DateTime     @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  task           Task         @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  document       Document     @relation(fields: [documentId], references: [id], onDelete: Restrict)
+  linkedBy       User         @relation("TaskDocumentLinker", fields: [linkedById], references: [id], onDelete: Restrict)
+
+  @@unique([taskId, documentId])
+  @@index([organizationId, linkedAt])
+  @@index([documentId])
+}
+
+model TaskDependency {
+  id              String       @id @default(cuid())
+  organizationId  String
+  taskId          String
+  dependsOnTaskId String
+  createdById     String
+  createdAt       DateTime     @default(now())
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  task            Task         @relation("DependentTask", fields: [taskId], references: [id], onDelete: Cascade)
+  dependsOnTask   Task         @relation("PrerequisiteTask", fields: [dependsOnTaskId], references: [id], onDelete: Cascade)
+  createdBy       User         @relation("TaskDependencyCreator", fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@unique([taskId, dependsOnTaskId])
+  @@index([organizationId, createdAt])
+  @@index([dependsOnTaskId])
+}
+
+model RequirementDefinition {
+  id             String                    @id @default(cuid())
+  organizationId String
+  matterKind     MatterKind
+  code           String
+  label          String
+  blocking       Boolean                   @default(true)
+  appliesToRole  String?
+  completionMode RequirementCompletionMode @default(MANUAL)
+  active         Boolean                   @default(true)
+  sortOrder      Int                       @default(0)
+  createdAt      DateTime                  @default(now())
+  updatedAt      DateTime                  @updatedAt
+  organization   Organization              @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, matterKind, code])
+  @@index([organizationId, matterKind, active, sortOrder])
+}
+
+model PilotCheckpoint {
+  id             String                @id @default(cuid())
+  organizationId String
+  code           String
+  label          String
+  blocking       Boolean               @default(true)
+  status         PilotCheckpointStatus @default(PENDING)
+  evidence       String?
+  completedById  String?
+  completedAt    DateTime?
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+  organization   Organization          @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  completedBy    User?                 @relation("PilotCheckpointCompleter", fields: [completedById], references: [id], onDelete: SetNull)
+
+  @@unique([organizationId, code])
+  @@index([organizationId, status])
+}
+
+model PilotProgram {
+  id                    String                 @id @default(cuid())
+  organizationId        String
+  name                  String
+  status                PilotProgramStatus     @default(DRAFT)
+  current               Boolean                @default(true)
+  rolloutPercentage     Int                    @default(0)
+  targetCases           Int                    @default(10)
+  startsAt              DateTime?
+  completedAt           DateTime?
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  organization          Organization           @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  participants          PilotParticipant[]
+  validations           PilotValidation[]
+  issues                PilotIssue[]
+  imports               PilotImportBatch[]
+  launchMetricSnapshots LaunchMetricSnapshot[]
+
+  @@index([organizationId, status])
+  @@index([organizationId, current, createdAt])
+}
+
+model PilotParticipant {
+  id               String                 @id @default(cuid())
+  organizationId   String
+  programId        String
+  membershipId     String
+  status           PilotParticipantStatus @default(ACTIVE)
+  trainingEvidence String?
+  trainedAt        DateTime?
+  trainedById      String?
+  addedById        String
+  addedAt          DateTime               @default(now())
+  removedAt        DateTime?
+  organization     Organization           @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  program          PilotProgram           @relation(fields: [programId], references: [id], onDelete: Cascade)
+  membership       Membership             @relation(fields: [membershipId], references: [id], onDelete: Restrict)
+  trainedBy        User?                  @relation("PilotTrainingConfirmer", fields: [trainedById], references: [id], onDelete: SetNull)
+  addedBy          User                   @relation("PilotParticipantAdder", fields: [addedById], references: [id], onDelete: Restrict)
+
+  @@unique([programId, membershipId])
+  @@index([organizationId, status])
+}
+
+model PilotValidation {
+  id              String                @id @default(cuid())
+  organizationId  String
+  programId       String
+  matterId        String
+  legacyReference String?
+  result          PilotValidationResult @default(PENDING)
+  notes           String?
+  validatedById   String?
+  validatedAt     DateTime?
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+  organization    Organization          @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  program         PilotProgram          @relation(fields: [programId], references: [id], onDelete: Cascade)
+  matter          Matter                @relation(fields: [matterId], references: [id], onDelete: Restrict)
+  validatedBy     User?                 @relation("PilotValidator", fields: [validatedById], references: [id], onDelete: SetNull)
+
+  @@unique([programId, matterId])
+  @@index([organizationId, result])
+}
+
+model PilotIssue {
+  id                   String             @id @default(cuid())
+  organizationId       String
+  programId            String
+  matterId             String?
+  category             String
+  severity             PilotIssueSeverity
+  status               PilotIssueStatus   @default(OPEN)
+  title                String
+  description          String
+  resolution           String?
+  assignedMembershipId String?
+  reportedById         String
+  resolvedById         String?
+  reportedAt           DateTime           @default(now())
+  resolvedAt           DateTime?
+  updatedAt            DateTime           @updatedAt
+  organization         Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  program              PilotProgram       @relation(fields: [programId], references: [id], onDelete: Cascade)
+  matter               Matter?            @relation(fields: [matterId], references: [id], onDelete: SetNull)
+  assignedMembership   Membership?        @relation(fields: [assignedMembershipId], references: [id], onDelete: SetNull)
+  reportedBy           User               @relation("PilotIssueReporter", fields: [reportedById], references: [id], onDelete: Restrict)
+  resolvedBy           User?              @relation("PilotIssueResolver", fields: [resolvedById], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, status, severity])
+  @@index([programId, reportedAt])
+}
+
+model PilotImportBatch {
+  id                String            @id @default(cuid())
+  organizationId    String
+  programId         String
+  sourceName        String
+  checksum          String
+  status            PilotImportStatus
+  totalRows         Int
+  validRows         Int
+  invalidRows       Int
+  importedRows      Int               @default(0)
+  payload           Json
+  validation        Json
+  importedEntityIds Json?
+  createdById       String
+  committedById     String?
+  createdAt         DateTime          @default(now())
+  committedAt       DateTime?
+  organization      Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  program           PilotProgram      @relation(fields: [programId], references: [id], onDelete: Cascade)
+  createdBy         User              @relation("PilotImportCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  committedBy       User?             @relation("PilotImportCommitter", fields: [committedById], references: [id], onDelete: SetNull)
+
+  @@unique([programId, checksum])
+  @@index([organizationId, status, createdAt])
+}
+
+model LaunchProgram {
+  id                 String                    @id @default(cuid())
+  organizationId     String
+  name               String
+  status             LaunchProgramStatus       @default(DRAFT)
+  current            Boolean                   @default(true)
+  targetEnvironment  LaunchTargetEnvironment   @default(LOCAL)
+  scope              String
+  createdById        String
+  decidedById        String?
+  decisionRationale  String?
+  decisionSnapshot   Json?
+  snapshotChecksum   String?
+  decidedAt          DateTime?
+  createdAt          DateTime                  @default(now())
+  updatedAt          DateTime                  @updatedAt
+  organization       Organization              @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy          User                      @relation("LaunchProgramCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  decidedBy          User?                     @relation("LaunchProgramDecider", fields: [decidedById], references: [id], onDelete: SetNull)
+  uatCases           LaunchUatCase[]
+  integrationChecks  LaunchIntegrationCheck[]
+  complianceControls LaunchComplianceControl[]
+  metricSnapshots    LaunchMetricSnapshot[]
+
+  @@index([organizationId, status])
+  @@index([organizationId, current, createdAt])
+}
+
+model LaunchUatCase {
+  id                   String            @id @default(cuid())
+  organizationId       String
+  programId            String
+  matterId             String?
+  assignedMembershipId String?
+  title                String
+  category             LaunchUatCategory
+  expectedResult       String
+  status               LaunchUatStatus   @default(PENDING)
+  actualResult         String?
+  evidence             String?
+  createdById          String
+  reviewedById         String?
+  reviewedAt           DateTime?
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+  organization         Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  program              LaunchProgram     @relation(fields: [programId], references: [id], onDelete: Cascade)
+  matter               Matter?           @relation(fields: [matterId], references: [id], onDelete: SetNull)
+  assignedMembership   Membership?       @relation(fields: [assignedMembershipId], references: [id], onDelete: SetNull)
+  createdBy            User              @relation("LaunchUatCaseCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  reviewedBy           User?             @relation("LaunchUatCaseReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@unique([programId, title])
+  @@index([organizationId, status, category])
+  @@index([programId, createdAt])
+}
+
+model LaunchIntegrationCheck {
+  id             String                  @id @default(cuid())
+  organizationId String
+  programId      String
+  kind           LaunchIntegrationKind
+  provider       String
+  status         LaunchIntegrationStatus @default(PENDING)
+  evidence       String?
+  testedById     String?
+  testedAt       DateTime?
+  createdAt      DateTime                @default(now())
+  updatedAt      DateTime                @updatedAt
+  organization   Organization            @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  program        LaunchProgram           @relation(fields: [programId], references: [id], onDelete: Cascade)
+  testedBy       User?                   @relation("LaunchIntegrationTester", fields: [testedById], references: [id], onDelete: SetNull)
+
+  @@unique([programId, kind])
+  @@index([organizationId, status])
+}
+
+model LaunchComplianceControl {
+  id             String                 @id @default(cuid())
+  organizationId String
+  programId      String
+  code           String
+  label          String
+  blocking       Boolean                @default(true)
+  status         LaunchComplianceStatus @default(PENDING)
+  evidence       String?
+  completedById  String?
+  completedAt    DateTime?
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+  organization   Organization           @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  program        LaunchProgram          @relation(fields: [programId], references: [id], onDelete: Cascade)
+  completedBy    User?                  @relation("LaunchComplianceCompleter", fields: [completedById], references: [id], onDelete: SetNull)
+
+  @@unique([programId, code])
+  @@index([organizationId, status])
+}
+
+model LaunchMetricSnapshot {
+  id                   String        @id @default(cuid())
+  organizationId       String
+  programId            String
+  sourcePilotProgramId String
+  metrics              Json
+  gates                Json
+  checksum             String
+  capturedById         String
+  capturedAt           DateTime      @default(now())
+  organization         Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  program              LaunchProgram @relation(fields: [programId], references: [id], onDelete: Cascade)
+  sourcePilotProgram   PilotProgram  @relation(fields: [sourcePilotProgramId], references: [id], onDelete: Restrict)
+  capturedBy           User          @relation("LaunchMetricCapturer", fields: [capturedById], references: [id], onDelete: Restrict)
+
+  @@index([organizationId, capturedAt])
+  @@index([programId, capturedAt])
+}
+
+model MatterParty {
+  id             String          @id @default(cuid())
+  organizationId String
+  matterId       String
+  personId       String
+  role           MatterPartyRole
+  isPrimary      Boolean         @default(true)
+  createdAt      DateTime        @default(now())
+  organization   Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  matter         Matter          @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  person         Person          @relation(fields: [personId], references: [id], onDelete: Restrict)
+
+  @@unique([matterId, personId, role])
+  @@index([organizationId, role])
+}
+
+model LeaseTerms {
+  id                            String       @id @default(cuid())
+  organizationId                String
+  matterId                      String       @unique
+  rentAmount                    Decimal      @db.Decimal(14, 2)
+  currency                      String       @default("MXN")
+  depositAmount                 Decimal?     @db.Decimal(14, 2)
+  prepaidRentAmount             Decimal?     @db.Decimal(14, 2)
+  totalInitialPayment           Decimal?     @db.Decimal(14, 2)
+  dueDay                        Int          @default(5)
+  paymentMethod                 String?
+  maintenanceIncluded           Boolean      @default(true)
+  startDate                     DateTime
+  endDate                       DateTime
+  durationMonths                Int          @default(12)
+  noticeDays                    Int          @default(30)
+  lateFeePercent                Decimal      @default(5) @db.Decimal(5, 2)
+  holdoverSurchargePercent      Decimal      @default(50) @db.Decimal(5, 2)
+  earlyTerminationPenaltyMonths Int          @default(2)
+  organization                  Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  matter                        Matter       @relation(fields: [matterId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+}
+
+model MediationTerms {
+  id                        String       @id @default(cuid())
+  organizationId            String
+  matterId                  String       @unique
+  agreementNumber           String?
+  caseFileNumber            String?
+  hearingAt                 DateTime?
+  centerName                String?
+  centerAccreditationNumber String?
+  facilitatorName           String?
+  facilitatorCertification  String?
+  certifiedCopies           Int          @default(3)
+  organization              Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  matter                    Matter       @relation(fields: [matterId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+}
+
+model ChecklistItem {
+  id             String                    @id @default(cuid())
+  organizationId String
+  matterId       String
+  code           String
+  label          String
+  blocking       Boolean                   @default(true)
+  appliesToRole  String?
+  completionMode RequirementCompletionMode @default(AUTO)
+  sortOrder      Int                       @default(0)
+  status         ChecklistStatus           @default(PENDING)
+  completedAt    DateTime?
+  waivedReason   String?
+  createdAt      DateTime                  @default(now())
+  updatedAt      DateTime                  @updatedAt
+  organization   Organization              @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  matter         Matter                    @relation(fields: [matterId], references: [id], onDelete: Cascade)
+
+  @@unique([matterId, code])
+  @@index([organizationId, status])
+}
+
+model Document {
+  id                     String                   @id @default(cuid())
+  organizationId         String
+  matterId               String?
+  personId               String?
+  propertyId             String?
+  sourceDocumentId       String?
+  type                   DocumentType
+  originalName           String
+  objectKey              String
+  bucket                 String
+  mimeType               String
+  sizeBytes              Int
+  checksum               String?
+  version                Int                      @default(1)
+  issuedAt               DateTime?
+  expiresAt              DateTime?
+  extractionStatus       ExtractionStatus         @default(NOT_REQUESTED)
+  extractedData          Json?
+  uploadedById           String
+  invalidatedAt          DateTime?
+  invalidationReason     String?
+  invalidatedById        String?
+  createdAt              DateTime                 @default(now())
+  organization           Organization             @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  matter                 Matter?                  @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  person                 Person?                  @relation(fields: [personId], references: [id], onDelete: SetNull)
+  property               Property?                @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  sourceDocument         Document?                @relation("DocumentDerivations", fields: [sourceDocumentId], references: [id], onDelete: Cascade)
+  derivedDocuments       Document[]               @relation("DocumentDerivations")
+  uploadedBy             User                     @relation("DocumentUploader", fields: [uploadedById], references: [id])
+  invalidatedBy          User?                    @relation("DocumentInvalidator", fields: [invalidatedById], references: [id], onDelete: SetNull)
+  reviews                DocumentReview[]
+  signatureSources       SignatureRequest[]       @relation("SignatureSourceDocument")
+  signatureResults       SignatureRequest[]       @relation("SignatureSignedDocument")
+  terminationEvidenceFor TerminationProcess?      @relation("TerminationEvidenceDocument")
+  clauseSnapshots        DocumentClauseSnapshot[]
+  portalUpload           PortalUpload?            @relation("PortalAcceptedDocument")
+  taskEvidenceLinks      TaskDocumentLink[]
+  extractionRuns         DocumentExtractionRun[]
+  libraryLinks           LibraryDocumentLink[]
+
+  @@unique([sourceDocumentId, type])
+  @@index([organizationId, matterId])
+  @@index([organizationId, type])
+  @@index([organizationId, expiresAt])
+  @@index([organizationId, invalidatedAt])
+  @@index([organizationId, sourceDocumentId])
+}
+
+model LibraryDocument {
+  id                String                @id @default(cuid())
+  organizationId    String
+  collectionId      String
+  externalId        String
+  title             String
+  source            String
+  originalPath      String
+  documentType      String
+  documentTypeLabel String
+  legalFamily       String
+  variant           String
+  usage             String
+  packageId         String
+  packageLabel      String
+  sha256            String
+  sizeBytes         Int
+  mimeType          String
+  objectKey         String
+  bucket            String
+  text              String                @db.Text
+  review            Json
+  duplicateOf       String?
+  textEquivalentTo  String?
+  importedById      String?
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+  organization      Organization          @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  importedBy        User?                 @relation("LibraryImporter", fields: [importedById], references: [id], onDelete: SetNull)
+  links             LibraryDocumentLink[]
+
+  @@unique([organizationId, collectionId, externalId])
+  @@index([organizationId, documentType, source])
+  @@index([organizationId, legalFamily, variant])
+  @@index([organizationId, collectionId, packageId])
+  @@index([organizationId, sha256])
+}
+
+model LibraryDocumentLink {
+  id                String          @id @default(cuid())
+  organizationId    String
+  libraryDocumentId String
+  documentId        String
+  createdAt         DateTime        @default(now())
+  organization      Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  libraryDocument   LibraryDocument @relation(fields: [libraryDocumentId], references: [id], onDelete: Restrict)
+  document          Document        @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@unique([libraryDocumentId, documentId])
+  @@index([organizationId, documentId])
+}
+
+model Clause {
+  id             String                  @id @default(cuid())
+  organizationId String
+  code           String
+  title          String
+  category       String?
+  matterKind     MatterKind
+  active         Boolean                 @default(true)
+  createdById    String
+  createdAt      DateTime                @default(now())
+  updatedAt      DateTime                @updatedAt
+  organization   Organization            @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy      User                    @relation("ClauseCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  versions       ClauseVersion[]
+  selections     MatterClauseSelection[]
+
+  @@unique([organizationId, code])
+  @@index([organizationId, matterKind, active])
+}
+
+model ClauseVersion {
+  id                String                   @id @default(cuid())
+  organizationId    String
+  clauseId          String
+  version           Int
+  body              String
+  status            ClauseVersionStatus      @default(DRAFT)
+  createdById       String
+  approvedById      String?
+  createdAt         DateTime                 @default(now())
+  approvedAt        DateTime?
+  organization      Organization             @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  clause            Clause                   @relation(fields: [clauseId], references: [id], onDelete: Cascade)
+  createdBy         User                     @relation("ClauseVersionCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  approvedBy        User?                    @relation("ClauseVersionApprover", fields: [approvedById], references: [id], onDelete: SetNull)
+  selections        MatterClauseSelection[]
+  documentSnapshots DocumentClauseSnapshot[]
+
+  @@unique([clauseId, version])
+  @@index([organizationId, status, createdAt])
+}
+
+model MatterClauseSelection {
+  id              String        @id @default(cuid())
+  organizationId  String
+  matterId        String
+  clauseId        String
+  clauseVersionId String
+  sortOrder       Int
+  selectedById    String
+  selectedAt      DateTime      @default(now())
+  organization    Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  matter          Matter        @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  clause          Clause        @relation(fields: [clauseId], references: [id], onDelete: Restrict)
+  clauseVersion   ClauseVersion @relation(fields: [clauseVersionId], references: [id], onDelete: Restrict)
+  selectedBy      User          @relation("ClauseSelector", fields: [selectedById], references: [id], onDelete: Restrict)
+
+  @@unique([matterId, clauseId])
+  @@unique([matterId, sortOrder])
+  @@index([organizationId, matterId])
+}
+
+model DocumentClauseSnapshot {
+  id                  String        @id @default(cuid())
+  organizationId      String
+  documentId          String
+  clauseVersionId     String
+  code                String
+  title               String
+  body                String
+  clauseVersionNumber Int
+  sortOrder           Int
+  createdAt           DateTime      @default(now())
+  organization        Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  document            Document      @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  clauseVersion       ClauseVersion @relation(fields: [clauseVersionId], references: [id], onDelete: Restrict)
+
+  @@unique([documentId, clauseVersionId])
+  @@index([organizationId, documentId, sortOrder])
+}
+
+model DocumentExtractionRun {
+  id              String                    @id @default(cuid())
+  organizationId  String
+  documentId      String
+  provider        String
+  status          ExtractionStatus
+  rawData         Json?
+  fieldCandidates Json?
+  message         String?
+  requestedById   String
+  requestedAt     DateTime                  @default(now())
+  completedAt     DateTime?
+  organization    Organization              @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  document        Document                  @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  requestedBy     User                      @relation("ExtractionRequester", fields: [requestedById], references: [id], onDelete: Restrict)
+  review          DocumentExtractionReview?
+
+  @@index([organizationId, status, requestedAt])
+  @@index([documentId, requestedAt])
+}
+
+model DocumentExtractionReview {
+  id              String                   @id @default(cuid())
+  organizationId  String
+  extractionRunId String                   @unique
+  decision        ExtractionReviewDecision
+  confirmedData   Json?
+  comment         String
+  reviewedById    String
+  reviewedAt      DateTime                 @default(now())
+  organization    Organization             @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  extractionRun   DocumentExtractionRun    @relation(fields: [extractionRunId], references: [id], onDelete: Cascade)
+  reviewedBy      User                     @relation("ExtractionReviewer", fields: [reviewedById], references: [id], onDelete: Restrict)
+
+  @@index([organizationId, reviewedAt])
+}
+
+model DocumentReview {
+  id             String                 @id @default(cuid())
+  organizationId String
+  matterId       String
+  documentId     String
+  reviewerUserId String
+  decision       DocumentReviewDecision
+  comment        String
+  createdAt      DateTime               @default(now())
+  organization   Organization           @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  matter         Matter                 @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  document       Document               @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  reviewer       User                   @relation("DocumentReviewer", fields: [reviewerUserId], references: [id], onDelete: Restrict)
+
+  @@index([organizationId, matterId, createdAt])
+  @@index([documentId, createdAt])
+}
+
+model SignatureRequest {
+  id                String          @id @default(cuid())
+  organizationId    String
+  matterId          String
+  sourceDocumentId  String
+  signedDocumentId  String?         @unique
+  provider          String          @default("MANUAL")
+  externalReference String?
+  status            SignatureStatus @default(PENDING)
+  requestedById     String
+  completedById     String?
+  cancelledById     String?
+  notes             String?
+  requestedAt       DateTime        @default(now())
+  completedAt       DateTime?
+  cancelledAt       DateTime?
+  signedAt          DateTime?
+  organization      Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  matter            Matter          @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  sourceDocument    Document        @relation("SignatureSourceDocument", fields: [sourceDocumentId], references: [id], onDelete: Restrict)
+  signedDocument    Document?       @relation("SignatureSignedDocument", fields: [signedDocumentId], references: [id], onDelete: SetNull)
+  requestedBy       User            @relation("SignatureRequester", fields: [requestedById], references: [id], onDelete: Restrict)
+  completedBy       User?           @relation("SignatureCompleter", fields: [completedById], references: [id], onDelete: SetNull)
+  cancelledBy       User?           @relation("SignatureCanceller", fields: [cancelledById], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, matterId, requestedAt])
+  @@index([matterId, status])
+}
+
+model TerminationProcess {
+  id                   String            @id @default(cuid())
+  organizationId       String
+  matterId             String
+  status               TerminationStatus @default(OPEN)
+  previousMatterStatus MatterStatus
+  reason               String
+  effectiveDate        DateTime?
+  startedById          String
+  startedAt            DateTime          @default(now())
+  cancelledById        String?
+  cancellationReason   String?
+  cancelledAt          DateTime?
+  closedById           String?
+  closureReason        String?
+  evidenceDocumentId   String?           @unique
+  closedAt             DateTime?
+  organization         Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  matter               Matter            @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  startedBy            User              @relation("TerminationStarter", fields: [startedById], references: [id], onDelete: Restrict)
+  cancelledBy          User?             @relation("TerminationCanceller", fields: [cancelledById], references: [id], onDelete: SetNull)
+  closedBy             User?             @relation("TerminationCloser", fields: [closedById], references: [id], onDelete: SetNull)
+  evidenceDocument     Document?         @relation("TerminationEvidenceDocument", fields: [evidenceDocumentId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, matterId, startedAt])
+  @@index([matterId, status])
+}
+
+model Reminder {
+  id               String          @id @default(cuid())
+  organizationId   String
+  matterId         String
+  taskId           String?
+  recipientUserId  String?
+  type             ReminderType
+  channel          ReminderChannel @default(IN_APP)
+  thresholdDays    Int?
+  scheduledFor     DateTime
+  status           ReminderStatus  @default(SCHEDULED)
+  dedupeKey        String          @unique
+  payload          Json?
+  acknowledgedById String?
+  acknowledgedAt   DateTime?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  organization     Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  matter           Matter          @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  task             Task?           @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  recipient        User?           @relation("ReminderRecipient", fields: [recipientUserId], references: [id], onDelete: SetNull)
+  acknowledgedBy   User?           @relation("ReminderAcknowledger", fields: [acknowledgedById], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, status, scheduledFor])
+  @@index([matterId, type, status])
+  @@index([taskId, type, status])
+  @@index([recipientUserId, status, scheduledFor])
+}
+
+model PasswordResetToken {
+  id         String    @id @default(cuid())
+  userId     String
+  tokenHash  String    @unique
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, consumedAt, expiresAt])
+  @@index([expiresAt])
+}
+
+model AuditEvent {
+  id             String       @id @default(cuid())
+  organizationId String
+  matterId       String?
+  actorUserId    String?
+  action         String
+  entityType     String
+  entityId       String
+  payload        Json?
+  createdAt      DateTime     @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  matter         Matter?      @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  actor          User?        @relation("AuditActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, createdAt])
+  @@index([organizationId, matterId, createdAt])
+}
+
+model PortalInvitation {
+  id             String            @id @default(cuid())
+  organizationId String
+  matterId       String
+  tokenHash      String            @unique
+  invitedEmail   String?
+  partyRole      MatterPartyRole
+  personId       String?
+  expiresAt      DateTime
+  revokedAt      DateTime?
+  lastAccessedAt DateTime?
+  createdById    String
+  createdAt      DateTime          @default(now())
+  organization   Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  matter         Matter            @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  invitedPerson  Person?           @relation("PortalInvitationPerson", fields: [personId], references: [id], onDelete: SetNull)
+  createdBy      User              @relation("PortalInvitationCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  submission     PortalSubmission?
+
+  @@index([organizationId, matterId, createdAt])
+  @@index([expiresAt, revokedAt])
+}
+
+model PortalSubmission {
+  id               String                 @id @default(cuid())
+  organizationId   String
+  matterId         String
+  invitationId     String                 @unique
+  status           PortalSubmissionStatus @default(DRAFT)
+  personData       Json?
+  submittedAt      DateTime?
+  reviewedAt       DateTime?
+  reviewedById     String?
+  reviewComment    String?
+  acceptedPersonId String?
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+  organization     Organization           @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  matter           Matter                 @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  invitation       PortalInvitation       @relation(fields: [invitationId], references: [id], onDelete: Cascade)
+  reviewedBy       User?                  @relation("PortalSubmissionReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+  acceptedPerson   Person?                @relation("PortalAcceptedPerson", fields: [acceptedPersonId], references: [id], onDelete: SetNull)
+  uploads          PortalUpload[]
+
+  @@index([organizationId, matterId, status, updatedAt])
+}
+
+model PortalUpload {
+  id                 String           @id @default(cuid())
+  organizationId     String
+  matterId           String
+  submissionId       String
+  type               DocumentType
+  originalName       String
+  objectKey          String
+  bucket             String
+  mimeType           String
+  sizeBytes          Int
+  checksum           String
+  acceptedDocumentId String?          @unique
+  createdAt          DateTime         @default(now())
+  organization       Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  matter             Matter           @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  submission         PortalSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  acceptedDocument   Document?        @relation("PortalAcceptedDocument", fields: [acceptedDocumentId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, matterId, createdAt])
+  @@index([submissionId, type])
+}
+
+// Billing contains metadata only: never prompts, files, or credentials.
+model AiConversation {
+  id             String        @id @default(uuid())
+  organizationId String
+  userId         String
+  createdAt      DateTime      @default(now())
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  user           User          @relation(fields: [userId], references: [id], onDelete: Restrict)
+  operations     AiOperation[]
+
+  @@index([organizationId, userId, createdAt])
+}
+
+model AiOperation {
+  id             String          @id @default(uuid())
+  organizationId String
+  userId         String
+  conversationId String?
+  parentId       String?
+  kind           String
+  label          String
+  documentId     String?
+  status         String          @default("PROCESSING")
+  createdAt      DateTime        @default(now())
+  completedAt    DateTime?
+  organization   Organization    @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  user           User            @relation(fields: [userId], references: [id], onDelete: Restrict)
+  conversation   AiConversation? @relation(fields: [conversationId], references: [id], onDelete: Restrict)
+  parent         AiOperation?    @relation("AiOperationParent", fields: [parentId], references: [id], onDelete: Restrict)
+  children       AiOperation[]   @relation("AiOperationParent")
+  attempts       AiUsageAttempt[]
+
+  @@index([organizationId, userId, createdAt])
+  @@index([conversationId, createdAt])
+}
+
+model AiUsageAttempt {
+  id                 String       @id @default(uuid())
+  organizationId     String
+  userId             String
+  operationId        String
+  model              String
+  providerResponseId String?
+  providerRequestId  String?
+  httpStatus         Int?
+  inputTokens        Int?
+  outputTokens       Int?
+  cachedInputTokens  Int?
+  reasoningTokens    Int?
+  confirmedCost      Decimal?     @db.Decimal(24, 12)
+  estimatedCost      Decimal?     @db.Decimal(24, 12)
+  currency           String?
+  costSource         String?
+  pricingSnapshotJson Json?
+  state              String       @default("STARTED")
+  createdAt          DateTime     @default(now())
+  completedAt        DateTime?
+  organization       Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  user               User         @relation(fields: [userId], references: [id], onDelete: Restrict)
+  operation          AiOperation  @relation(fields: [operationId], references: [id], onDelete: Restrict)
+
+  @@index([organizationId, userId, createdAt])
+  @@index([operationId, createdAt])
+  @@index([state, createdAt])
+}
+
+model AiBudgetSnapshot {
+  id                 String       @id
+  organizationId     String
+  userId             String
+  providerConfigHash String
+  scope              String
+  currency           String?
+  limit              Decimal?     @db.Decimal(24, 12)
+  spent              Decimal?     @db.Decimal(24, 12)
+  remaining          Decimal?     @db.Decimal(24, 12)
+  updatedAt          DateTime     @default(now())
+  organization       Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  user               User         @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@index([organizationId, userId, providerConfigHash])
+}

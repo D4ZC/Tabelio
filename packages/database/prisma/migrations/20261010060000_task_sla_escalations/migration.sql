@@ -1,0 +1,3 @@
+ALTER TABLE "Task"
+  ADD COLUMN "slaEscalationLevel" INTEGER NOT NULL DEFAULT 0,
+  ADD COLUMN "slaEscalatedAt" TIMESTAMP(3);

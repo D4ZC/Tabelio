@@ -1,0 +1,46 @@
+{
+  "name": "tabelio",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run db:generate && npm run build -w @despacho/domain && npm run build -w @despacho/database && npm run build -w @despacho/api && npm run build -w @despacho/web",
+    "dev": "bash scripts/local-dev.sh",
+    "dev:apps": "concurrently -n api,web -c blue,green \"npm run dev -w @despacho/api\" \"npm run dev -w @despacho/web\"",
+    "lint": "npm run lint --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present && npm run test:budget-connector && npm run test:library",
+    "test:library": "node --test scripts/import-legal-library.test.mjs",
+    "library:import": "node scripts/import-legal-library.mjs",
+    "test:smoke": "node scripts/smoke-test.mjs",
+    "test:budget-connector": "node --test extensions/ibm-budget-connector/test/*.test.mjs",
+    "docx:fixture": "npm run build -w @despacho/api --silent && node scripts/generate-lease-fixture.mjs",
+    "docx:fixture:agreement": "npm run build -w @despacho/api --silent && node scripts/generate-agreement-fixture.mjs",
+    "db:generate": "npm run db:generate -w @despacho/database",
+    "db:migrate": "npm run db:migrate -w @despacho/database",
+    "db:deploy": "npm run db:deploy -w @despacho/database",
+    "db:push": "npm run db:push -w @despacho/database",
+    "db:seed": "npm run db:seed -w @despacho/database",
+    "demo:prepare": "node scripts/prepare-assistant-demo.mjs",
+    "pilot:backup": "bash scripts/pilot-backup.sh",
+    "pilot:verify-backup": "bash scripts/pilot-verify-backup.sh",
+    "pilot:check": "bash scripts/pilot-check.sh",
+    "pilot:deploy": "bash scripts/pilot-deploy.sh",
+    "launch:check": "bash scripts/launch-check.sh",
+    "mcp:check": "node scripts/mcp-check.mjs",
+    "mobile:setup": "node scripts/mobile-certificates.mjs",
+    "dev:mobile": "DESPACHO_MOBILE_HTTPS=true bash scripts/local-dev.sh",
+    "dev:apps:mobile": "concurrently -n api,web,mobile -c blue,green,magenta \"npm run dev -w @despacho/api\" \"npm run dev -w @despacho/web\" \"npm run mobile:serve\"",
+    "mobile:serve": "node scripts/mobile-proxy.mjs"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.1",
+    "concurrently": "^9.2.1",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

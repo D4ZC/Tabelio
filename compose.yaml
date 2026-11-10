@@ -1,0 +1,128 @@
+services:
+  api:
+    profiles: ["app"]
+    build:
+      context: .
+      target: api
+    environment:
+      DATABASE_URL: postgresql://despacho:despacho@postgres:5432/despacho?schema=public
+      API_PORT: 4000
+      WEB_ORIGIN: http://localhost:3000
+      JWT_SECRET: local-docker-secret-change-before-deploy
+      STORAGE_DRIVER: local
+      LOCAL_STORAGE_PATH: /app/storage
+      TEMPLATE_ROOT: /app/apps/api/templates
+      LIBREOFFICE_BIN: soffice
+      PDF_CONVERSION_TIMEOUT_MS: 60000
+      MCP_ENABLED: "true"
+      # El puerto del host está ligado a loopback; dentro del contenedor la conexión llega por NAT.
+      MCP_LOCAL_ONLY: "false"
+      MCP_INTERNAL_API_URL: http://127.0.0.1:4000/api
+      ASSISTANT_ENABLED: "${ASSISTANT_ENABLED:-false}"
+      DOCUMENT_EXTRACTION_ENABLED: "${DOCUMENT_EXTRACTION_ENABLED:-false}"
+      ASSISTANT_API_BASE_URL: "${ASSISTANT_API_BASE_URL:-https://api.servicesessentials.ibm.com}"
+      ASSISTANT_RESPONSES_PATH: "${ASSISTANT_RESPONSES_PATH-}"
+      ASSISTANT_API_KEY: "${ASSISTANT_API_KEY-}"
+      ASSISTANT_API_KEY_HEADER: "${ASSISTANT_API_KEY_HEADER:-Authorization}"
+      ASSISTANT_API_KEY_SCHEME: "${ASSISTANT_API_KEY_SCHEME-Bearer}"
+      ASSISTANT_MODEL: "${ASSISTANT_MODEL:-global-models}"
+      ASSISTANT_MCP_URL: http://127.0.0.1:4000/mcp
+      ASSISTANT_MCP_TIMEOUT_MS: "${ASSISTANT_MCP_TIMEOUT_MS:-15000}"
+      ASSISTANT_TURN_TIMEOUT_MS: "${ASSISTANT_TURN_TIMEOUT_MS:-90000}"
+      ASSISTANT_TIMEOUT_MS: "${ASSISTANT_TIMEOUT_MS:-45000}"
+      ASSISTANT_MAX_OUTPUT_TOKENS: "${ASSISTANT_MAX_OUTPUT_TOKENS:-6000}"
+      ASSISTANT_MAX_TOOL_ROUNDS: "${ASSISTANT_MAX_TOOL_ROUNDS:-6}"
+      ASSISTANT_MAX_TOOL_CALLS_PER_RESPONSE: "${ASSISTANT_MAX_TOOL_CALLS_PER_RESPONSE:-8}"
+      ASSISTANT_MAX_TOOL_CALLS_PER_TURN: "${ASSISTANT_MAX_TOOL_CALLS_PER_TURN:-16}"
+      ASSISTANT_MAX_PENDING_ACTIONS_PER_USER: "${ASSISTANT_MAX_PENDING_ACTIONS_PER_USER:-3}"
+      ASSISTANT_RATE_LIMIT_PER_MINUTE: "${ASSISTANT_RATE_LIMIT_PER_MINUTE:-12}"
+      ICA_BUDGET_URL: "${ICA_BUDGET_URL-}"
+      ICA_BUDGET_TEAM_ID: "${ICA_BUDGET_TEAM_ID-}"
+      ICA_BUDGET_AUTH_MODE: "${ICA_BUDGET_AUTH_MODE:-w3}"
+      ICA_BUDGET_OWNER_EMAIL: "${ICA_BUDGET_OWNER_EMAIL-}"
+      ICA_BUDGET_SCOPE: "${ICA_BUDGET_SCOPE-}"
+      ICA_BUDGET_API_KEY: "${ICA_BUDGET_API_KEY-}"
+      ICA_BUDGET_CURRENCY: "${ICA_BUDGET_CURRENCY-}"
+      ICA_BUDGET_CURRENCY_PATH: "${ICA_BUDGET_CURRENCY_PATH-}"
+      ICA_BUDGET_LIMIT_PATH: "${ICA_BUDGET_LIMIT_PATH-}"
+      ICA_BUDGET_SPENT_PATH: "${ICA_BUDGET_SPENT_PATH-}"
+      ICA_BUDGET_REMAINING_PATH: "${ICA_BUDGET_REMAINING_PATH-}"
+      ICA_BUDGET_CACHE_SECONDS: "${ICA_BUDGET_CACHE_SECONDS:-60}"
+      AI_USAGE_PROVIDER_COST_HEADER: "${AI_USAGE_PROVIDER_COST_HEADER-}"
+      AI_USAGE_PROVIDER_COST_JSON_PATH: "${AI_USAGE_PROVIDER_COST_JSON_PATH-}"
+      AI_USAGE_PROVIDER_COST_CURRENCY: "${AI_USAGE_PROVIDER_COST_CURRENCY-}"
+      AI_USAGE_PRICING_JSON: "${AI_USAGE_PRICING_JSON-}"
+    ports:
+      - "127.0.0.1:4000:4000"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:4000/api/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - object-data:/app/storage
+
+  web:
+    profiles: ["app"]
+    build:
+      context: .
+      target: web
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:4000/api
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: despacho
+      POSTGRES_USER: despacho
+      POSTGRES_PASSWORD: despacho
+    ports:
+      - "55432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U despacho -d despacho"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  minio:
+    profiles: ["s3"]
+    image: quay.io/minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: despacho
+      MINIO_ROOT_PASSWORD: despacho-secret
+    ports:
+      - "59000:9000"
+      - "59001:9001"
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  minio-init:
+    profiles: ["s3"]
+    image: quay.io/minio/mc:latest
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "mc alias set local http://minio:9000 despacho despacho-secret &&
+      mc mb --ignore-existing local/expedientes"
+
+volumes:
+  postgres-data:
+  minio-data:
+  object-data:

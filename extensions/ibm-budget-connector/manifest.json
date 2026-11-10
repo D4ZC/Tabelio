@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "Tabelio · Presupuesto IBM",
+  "version": "1.0.0",
+  "description": "Consulta tu presupuesto IBM desde Usage con tu sesión W3 y lo muestra en la demo local autorizada.",
+  "permissions": ["storage", "activeTab"],
+  "host_permissions": ["https://servicesessentials.ibm.com/*"],
+  "background": { "service_worker": "background.js" },
+  "action": { "default_title": "Presupuesto IBM", "default_popup": "popup.html" },
+  "content_scripts": [
+    {
+      "matches": ["http://localhost:3000/*"],
+      "js": ["protocol.js", "demo-bridge.js"],
+      "run_at": "document_start",
+      "all_frames": false
+    },
+    {
+      "matches": ["https://servicesessentials.ibm.com/settings/usage*"],
+      "js": ["protocol.js", "ibm-session.js"],
+      "run_at": "document_start",
+      "all_frames": false
+    }
+  ],
+  "content_security_policy": { "extension_pages": "script-src 'self'; object-src 'none'" }
+}
