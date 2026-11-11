@@ -21,8 +21,8 @@ export default function NewMatterPage() {
 
   useEffect(() => {
     Promise.all([
-      apiFetch<Property[]>('/properties'),
-      apiFetch<MatterSummary[]>('/matters'),
+      apiFetch<Property[]>('/properties?view=options'),
+      apiFetch<MatterSummary[]>('/matters?view=options&kind=LEASE'),
       apiFetch<TaskAssignee[]>('/tasks/assignees'),
     ])
       .then(([propertyData, matterData, assigneeData]) => {

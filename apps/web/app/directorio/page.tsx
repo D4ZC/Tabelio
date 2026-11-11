@@ -33,6 +33,8 @@ export default function DirectoryPage() {
   );
   const visibleRecords = tab === 'people' ? filteredPeople : filteredProperties;
   const totalRecords = tab === 'people' ? people.length : properties.length;
+  // Con miles de registros importados se limita lo que se pinta; la búsqueda acota el resto.
+  const RENDER_LIMIT = 200;
 
   async function createPerson(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -116,11 +118,12 @@ export default function DirectoryPage() {
       )}
 
       <section className="card directory-grid">
-        {tab === 'people' ? filteredPeople.map((person) => (
-          <article className="directory-item" key={person.id}><div className="avatar large">{person.legalName.slice(0, 1)}</div><div><strong>{person.legalName}</strong><span>{person.taxId || 'RFC pendiente'}</span><small>{person.email || person.phone || 'Sin contacto capturado'}</small></div><div className="directory-actions"><span className="tag">Persona física</span><button className="link-button" onClick={() => { setEditingPerson(person); setShowForm(true); scrollTo({ top: 0, behavior: 'smooth' }); }}>Editar</button></div></article>
-        )) : filteredProperties.map((property) => (
+        {tab === 'people' ? filteredPeople.slice(0, RENDER_LIMIT).map((person) => (
+          <article className="directory-item" key={person.id}><div className="avatar large">{person.legalName.slice(0, 1)}</div><div><strong>{person.legalName}</strong><span>{person.taxId || 'RFC pendiente'}</span><small>{person.email || person.phone || 'Sin contacto capturado'}</small></div><div className="directory-actions"><span className="tag">{person.type === 'COMPANY' ? 'Persona moral' : 'Persona física'}</span><button className="link-button" onClick={() => { setEditingPerson(person); setShowForm(true); scrollTo({ top: 0, behavior: 'smooth' }); }}>Editar</button></div></article>
+        )) : filteredProperties.slice(0, RENDER_LIMIT).map((property) => (
           <article className="directory-item" key={property.id}><div className="property-icon">⌂</div><div><strong>{property.displayName}</strong><span>{property.addressLine1}</span><small>{property.city}, {property.state} · {property.useType}</small></div><div className="directory-actions"><span className="tag">{property.owner?.legalName || 'Propietario pendiente'}</span><button className="link-button" onClick={() => { setEditingProperty(property); setShowForm(true); scrollTo({ top: 0, behavior: 'smooth' }); }}>Editar</button></div></article>
         ))}
+        {visibleRecords.length > RENDER_LIMIT && <div className="empty compact"><strong>Mostrando {RENDER_LIMIT} de {visibleRecords.length.toLocaleString('es-MX')}</strong><span>Escribe un nombre, RFC o domicilio para acotar los resultados.</span></div>}
         {visibleRecords.length === 0 && <div className="empty"><strong>{search.trim() ? 'Sin coincidencias' : 'No hay registros'}</strong><span>{search.trim() ? 'Prueba con otro nombre, correo, RFC, teléfono o dato del registro.' : 'Agrega el primero para reutilizarlo en un expediente.'}</span></div>}
       </section>
     </AppShell>

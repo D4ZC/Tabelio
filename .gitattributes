@@ -1,0 +1,3 @@
+# Los scripts de shell deben conservar finales LF también en Windows (Git Bash falla con CRLF).
+*.sh text eol=lf
+.env* text eol=lf

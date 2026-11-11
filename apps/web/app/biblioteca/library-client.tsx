@@ -109,7 +109,7 @@ export function LibraryClient({ initialMatterId, initialDocumentId }: { initialM
         if (controller.signal.aborted) return;
         setRole(session.role);
         if (['ADMIN', 'LAWYER', 'OPERATOR'].includes(session.role)) {
-          const data = await apiFetch<MatterSummary[]>('/matters', { signal: controller.signal });
+          const data = await apiFetch<MatterSummary[]>('/matters?view=options', { signal: controller.signal });
           if (!controller.signal.aborted) setMatters(data);
         }
       } catch (cause) {

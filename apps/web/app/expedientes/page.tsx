@@ -1,11 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AppShell } from '@/components/app-shell';
 import { StatusPill } from '@/components/status-pill';
 import { apiFetch } from '@/lib/api';
-import type { MatterSummary, OperationsDashboard, Reminder, RenewalAlert } from '@/lib/types';
+import { statusLabels, type MatterPage, type MatterSummary, type OperationsDashboard, type Reminder, type RenewalAlert } from '@/lib/types';
+
+const PAGE_SIZE = 50;
 
 const renewalLabels: Record<RenewalAlert['level'], string> = {
   NONE: 'Fuera de ventana',
@@ -18,33 +20,70 @@ const renewalLabels: Record<RenewalAlert['level'], string> = {
 
 export default function MattersPage() {
   const [matters, setMatters] = useState<MatterSummary[]>([]);
+  const [total, setTotal] = useState(0);
   const [query, setQuery] = useState('');
+  const [status, setStatus] = useState('');
   const [dashboard, setDashboard] = useState<OperationsDashboard>();
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [reminderBusy, setReminderBusy] = useState('');
   const [error, setError] = useState('');
+  const requestId = useRef(0);
 
-  function loadPage() {
-    return Promise.all([
-      apiFetch<MatterSummary[]>('/matters'),
-      apiFetch<OperationsDashboard>('/matters/dashboard'),
-      apiFetch<Reminder[]>('/notifications'),
-    ])
-      .then(([matterData, dashboardData, reminderData]) => {
-        setMatters(matterData);
-        setDashboard(dashboardData);
-        setReminders(reminderData);
-      })
-      .catch((cause) => setError((cause as Error).message))
-      .finally(() => setLoading(false));
+  function matterPath(skip: number) {
+    const params = new URLSearchParams({ take: String(PAGE_SIZE), skip: String(skip) });
+    if (query.trim()) params.set('q', query.trim());
+    if (status) params.set('status', status);
+    return `/matters/page?${params}`;
   }
 
   useEffect(() => {
-    void loadPage();
-    // La carga sólo depende del montaje inicial de la pantalla.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    Promise.all([
+      apiFetch<OperationsDashboard>('/matters/dashboard'),
+      apiFetch<Reminder[]>('/notifications'),
+    ])
+      .then(([dashboardData, reminderData]) => {
+        setDashboard(dashboardData);
+        setReminders(reminderData);
+      })
+      .catch((cause) => setError((cause as Error).message));
   }, []);
+
+  // La búsqueda se resuelve en el servidor: con miles de expedientes no se descarga el listado completo.
+  useEffect(() => {
+    const current = ++requestId.current;
+    setLoading(true);
+    const timer = setTimeout(() => {
+      apiFetch<MatterPage>(matterPath(0))
+        .then((page) => {
+          if (current !== requestId.current) return;
+          setMatters(page.items);
+          setTotal(page.total);
+          setError('');
+        })
+        .catch((cause) => { if (current === requestId.current) setError((cause as Error).message); })
+        .finally(() => { if (current === requestId.current) setLoading(false); });
+    }, query ? 300 : 0);
+    return () => clearTimeout(timer);
+    // matterPath sólo depende de query y status.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query, status]);
+
+  async function loadMore() {
+    const current = requestId.current;
+    setLoadingMore(true);
+    try {
+      const page = await apiFetch<MatterPage>(matterPath(matters.length));
+      if (current !== requestId.current) return;
+      setMatters((previous) => [...previous, ...page.items]);
+      setTotal(page.total);
+    } catch (cause) {
+      setError((cause as Error).message);
+    } finally {
+      setLoadingMore(false);
+    }
+  }
 
   async function acknowledgeReminder(reminderId: string) {
     setReminderBusy(reminderId);
@@ -74,9 +113,8 @@ export default function MattersPage() {
     }
   }
 
-  const filtered = useMemo(() => matters.filter((matter) =>
-    `${matter.reference} ${matter.title} ${matter.property?.displayName ?? ''}`.toLowerCase().includes(query.toLowerCase()),
-  ), [matters, query]);
+  const filtered = matters;
+  const filtersActive = Boolean(query.trim() || status);
 
   const active = dashboard?.metrics.active ?? matters.filter((matter) => matter.status === 'ACTIVE').length;
   const integration = dashboard?.metrics.integration ?? matters.filter((matter) => ['DRAFT', 'INTEGRATION', 'PENDING_CLIENT', 'VALIDATION'].includes(matter.status)).length;
@@ -132,12 +170,20 @@ export default function MattersPage() {
 
       <section className="card table-card">
         <div className="card-toolbar">
-          <div><h2>Todos los asuntos</h2><p>{filtered.length} resultado(s)</p></div>
-          <input className="search" placeholder="Buscar referencia, persona o inmueble…" value={query} onChange={(event) => setQuery(event.target.value)} />
+          <div><h2>Todos los asuntos</h2><p>{loading ? 'Buscando…' : `${total.toLocaleString('es-MX')} resultado(s)${filtered.length < total ? ` · mostrando ${filtered.length}` : ''}`}</p></div>
+          <div className="heading-actions">
+            <select className="search" aria-label="Filtrar por estado" value={status} onChange={(event) => setStatus(event.target.value)}>
+              <option value="">Todos los estados</option>
+              {Object.entries(statusLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+            </select>
+            <input className="search" placeholder="Buscar expediente, convenio, persona o inmueble…" value={query} onChange={(event) => setQuery(event.target.value)} />
+          </div>
         </div>
         {error && <div className="alert error">{error}</div>}
-        {loading ? <div className="empty">Cargando expedientes…</div> : filtered.length === 0 ? (
-          <div className="empty"><strong>Aún no hay expedientes</strong><span>Crea el primero para iniciar el flujo guiado.</span></div>
+        {loading && filtered.length === 0 ? <div className="empty">Cargando expedientes…</div> : filtered.length === 0 ? (
+          filtersActive
+            ? <div className="empty"><strong>Sin coincidencias</strong><span>Prueba con otro nombre, número de expediente o convenio.</span></div>
+            : <div className="empty"><strong>Aún no hay expedientes</strong><span>Crea el primero para iniciar el flujo guiado.</span></div>
         ) : (
           <div className="data-table">
             <div className="table-row table-head"><span>Expediente</span><span>Tipo</span><span>Inmueble</span><span>Estado</span><span>Vencimiento</span><span>Actividad</span></div>
@@ -153,6 +199,11 @@ export default function MattersPage() {
             ))}
           </div>
         )}
+        {!loading && filtered.length < total && <div className="empty compact">
+          <button className="button secondary" type="button" disabled={loadingMore} onClick={loadMore}>
+            {loadingMore ? 'Cargando…' : `Cargar ${Math.min(PAGE_SIZE, total - filtered.length)} más`}
+          </button>
+        </div>}
       </section>
     </AppShell>
   );

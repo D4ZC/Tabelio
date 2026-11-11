@@ -6,8 +6,10 @@ import { apiFetch } from '@/lib/api';
 import './login-mobile.css';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('admin@demo.local');
-  const [password, setPassword] = useState('Demo123!');
+  // Credenciales precargadas configurables: con datos reales (p. ej. Corporativo Clerc) se precarga sólo el correo.
+  const [email, setEmail] = useState(process.env.NEXT_PUBLIC_LOGIN_EMAIL ?? 'admin@demo.local');
+  const [password, setPassword] = useState(process.env.NEXT_PUBLIC_LOGIN_PASSWORD
+    ?? (process.env.NEXT_PUBLIC_LOGIN_EMAIL ? '' : 'Demo123!'));
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -19,7 +21,13 @@ export default function LoginPage() {
     try {
       await apiFetch('/auth/login', {
         method: 'POST',
-        body: JSON.stringify({ email, password, organizationSlug: 'demo-despacho' }),
+        // Sin organización configurada, la API usa la membresía del usuario (antes estaba fija en 'demo-despacho'
+        // y rechazaba como "credenciales incorrectas" a usuarios de cualquier otra organización).
+        body: JSON.stringify({
+          email,
+          password,
+          ...(process.env.NEXT_PUBLIC_ORGANIZATION_SLUG ? { organizationSlug: process.env.NEXT_PUBLIC_ORGANIZATION_SLUG } : {}),
+        }),
       });
       location.assign(window.matchMedia('(max-width: 760px)').matches ? '/asistente' : '/expedientes');
     } catch (cause) {

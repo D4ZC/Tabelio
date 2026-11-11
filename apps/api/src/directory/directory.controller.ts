@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { CurrentUser } from '../auth/current-user.decorator';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { RequirePermissions } from '../auth/permissions.decorator';
@@ -13,8 +13,8 @@ export class DirectoryController {
 
   @Get('people')
   @RequirePermissions('DIRECTORY_READ')
-  listPeople(@CurrentUser() user: AuthenticatedUser) {
-    return this.directory.listPeople(user);
+  listPeople(@CurrentUser() user: AuthenticatedUser, @Query('view') view?: string) {
+    return view === 'options' ? this.directory.listPeopleOptions(user) : this.directory.listPeople(user);
   }
 
   @Post('people')
@@ -25,8 +25,8 @@ export class DirectoryController {
 
   @Get('properties')
   @RequirePermissions('DIRECTORY_READ')
-  listProperties(@CurrentUser() user: AuthenticatedUser) {
-    return this.directory.listProperties(user);
+  listProperties(@CurrentUser() user: AuthenticatedUser, @Query('view') view?: string) {
+    return view === 'options' ? this.directory.listPropertyOptions(user) : this.directory.listProperties(user);
   }
 
   @Post('properties')

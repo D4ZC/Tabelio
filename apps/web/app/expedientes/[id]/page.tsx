@@ -164,7 +164,7 @@ export default function MatterPage() {
   const load = async () => {
     try {
       const [matterData, personData, propertyData, invitationData, assigneeData] = await Promise.all([
-        apiFetch<MatterDetail>(`/matters/${id}`), apiFetch<Person[]>('/people'), apiFetch<Property[]>('/properties'),
+        apiFetch<MatterDetail>(`/matters/${id}`), apiFetch<Person[]>('/people?view=options'), apiFetch<Property[]>('/properties?view=options'),
         apiFetch<PortalInvitation[]>(`/matters/${id}/portal-invitations`),
         apiFetch<TaskAssignee[]>('/tasks/assignees'),
       ]);

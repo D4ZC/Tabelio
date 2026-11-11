@@ -37,6 +37,13 @@ export interface Property {
   owner?: Pick<Person, 'id' | 'legalName'>;
 }
 
+export interface MatterPage {
+  items: MatterSummary[];
+  total: number;
+  take: number;
+  skip: number;
+}
+
 export interface MatterSummary {
   id: string;
   reference: string;

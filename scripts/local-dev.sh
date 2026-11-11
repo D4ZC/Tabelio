@@ -19,14 +19,17 @@ fi
 # Puerto dedicado para no interferir con PostgreSQL ya instalado.
 export DATABASE_URL='postgresql://despacho:despacho@localhost:55432/despacho?schema=public'
 export STORAGE_DRIVER='local'
-export LOCAL_STORAGE_PATH="$project_dir/storage"
-export TEMPLATE_ROOT="$project_dir/apps/api/templates"
+# Respeta rutas definidas en .env (p. ej. documentos importados en otra unidad).
+export LOCAL_STORAGE_PATH="${LOCAL_STORAGE_PATH:-$project_dir/storage}"
+export TEMPLATE_ROOT="${TEMPLATE_ROOT:-$project_dir/apps/api/templates}"
 
 if [[ -z "${LIBREOFFICE_BIN:-}" ]]; then
   if command -v soffice >/dev/null 2>&1; then
     export LIBREOFFICE_BIN="$(command -v soffice)"
   elif [[ -x /Applications/LibreOffice.app/Contents/MacOS/soffice ]]; then
     export LIBREOFFICE_BIN='/Applications/LibreOffice.app/Contents/MacOS/soffice'
+  elif [[ -f '/c/Program Files/LibreOffice/program/soffice.exe' ]]; then
+    export LIBREOFFICE_BIN='C:/Program Files/LibreOffice/program/soffice.exe'
   else
     user_home="${HOME:?No se pudo determinar el directorio del usuario}"
     codex_soffice="$user_home/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/override/soffice"

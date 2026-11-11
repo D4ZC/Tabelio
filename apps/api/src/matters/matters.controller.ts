@@ -23,7 +23,16 @@ export class MattersController {
     @CurrentUser() user: AuthenticatedUser,
     @Query() query: ListMattersQueryDto,
   ) {
-    return this.matters.list(user, query);
+    return query.view === 'options' ? this.matters.listOptions(user, query) : this.matters.list(user, query);
+  }
+
+  @Get('page')
+  @RequirePermissions('MATTER_READ')
+  page(
+    @CurrentUser() user: AuthenticatedUser,
+    @Query() query: ListMattersQueryDto,
+  ) {
+    return this.matters.page(user, query);
   }
 
   @Get('dashboard')

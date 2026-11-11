@@ -79,6 +79,9 @@ artifacts/
 /script1.sh
 /verify_edge_auth*.sh
 
+# Local import scratch space (CLERC backup analysis; contains client data paths).
+/.import-work/
+
 # Local tool state and Python environments.
 .bob/
 .codex/

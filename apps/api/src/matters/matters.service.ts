@@ -58,17 +58,57 @@ export class MattersService {
     private readonly requirements: RequirementsService,
   ) {}
 
+  private listWhere(user: AuthenticatedUser, query: ListMattersQueryDto): Prisma.MatterWhereInput {
+    const text = query.q?.trim();
+    const contains = text ? { contains: text, mode: 'insensitive' as const } : undefined;
+    return {
+      organizationId: user.organizationId,
+      ...(query.status ? { status: query.status } : {}),
+      ...(query.kind ? { kind: query.kind } : {}),
+      ...(contains ? {
+        OR: [
+          { reference: contains },
+          { title: contains },
+          { notes: contains },
+          { property: { displayName: contains } },
+          { mediationTerms: { agreementNumber: contains } },
+          { parties: { some: { person: { legalName: contains } } } },
+        ],
+      } : {}),
+    };
+  }
+
+  /** Página de expedientes con total, para organizaciones con miles de asuntos. */
+  async page(user: AuthenticatedUser, query: ListMattersQueryDto = {}, asOf = new Date()) {
+    const take = query.take ?? 50;
+    const skip = query.skip ?? 0;
+    const [items, total] = await Promise.all([
+      this.list(user, { ...query, take, skip }, asOf),
+      this.prisma.matter.count({ where: this.listWhere(user, query) }),
+    ]);
+    return { items, total, take, skip };
+  }
+
+  /** Lista ligera para selectores: evita transferir el detalle de miles de expedientes. */
+  listOptions(user: AuthenticatedUser, query: ListMattersQueryDto = {}) {
+    return this.prisma.matter.findMany({
+      where: this.listWhere(user, query),
+      ...(query.take ? { take: query.take } : {}),
+      ...(query.skip ? { skip: query.skip } : {}),
+      select: { id: true, reference: true, title: true, kind: true, status: true, propertyId: true, updatedAt: true },
+      orderBy: [{ updatedAt: 'desc' }, { id: 'asc' }],
+    });
+  }
+
   async list(
     user: AuthenticatedUser,
     query: ListMattersQueryDto = {},
     asOf = new Date(),
   ) {
     const matters = await this.prisma.matter.findMany({
-      where: {
-        organizationId: user.organizationId,
-        ...(query.status ? { status: query.status } : {}),
-        ...(query.kind ? { kind: query.kind } : {}),
-      },
+      where: this.listWhere(user, query),
+      ...(query.take ? { take: query.take } : {}),
+      ...(query.skip ? { skip: query.skip } : {}),
       include: {
         property: { select: { id: true, displayName: true, city: true, state: true } },
         responsible: { include: { user: { select: { id: true, displayName: true } } } },
@@ -80,7 +120,7 @@ export class MattersService {
         cancelledBy: { select: { id: true, displayName: true } },
         _count: { select: { parties: true, documents: true, checklistItems: true } },
       },
-      orderBy: { updatedAt: 'desc' },
+      orderBy: [{ updatedAt: 'desc' }, { id: 'asc' }],
     });
     return matters.map((matter) => ({
       ...matter,
@@ -92,16 +132,27 @@ export class MattersService {
   }
 
   async dashboard(user: AuthenticatedUser, asOf = new Date()) {
-    const matters = await this.list(user, {}, asOf);
-    const activatedMatters = matters.filter((matter) => matter.activatedAt);
-    const averageDaysToActivation = activatedMatters.length
-      ? Math.round(
-        activatedMatters.reduce((total, matter) => (
-          total + (matter.activatedAt!.getTime() - matter.createdAt.getTime()) / 86_400_000
-        ), 0) / activatedMatters.length * 10,
-      ) / 10
+    // Conteos agregados en base de datos: el listado completo no escala a miles de expedientes.
+    const [statusCounts, activated, renewalCandidates] = await Promise.all([
+      this.prisma.matter.groupBy({ by: ['status'], where: { organizationId: user.organizationId }, _count: { _all: true } }),
+      this.prisma.matter.findMany({
+        where: { organizationId: user.organizationId, activatedAt: { not: null } },
+        select: { createdAt: true, activatedAt: true },
+      }),
+      this.list(user, { kind: MatterKind.LEASE }, asOf),
+    ]);
+    const countOf = (statuses: Iterable<MatterStatus>) => {
+      const wanted = new Set(statuses);
+      return statusCounts.reduce((total, row) => total + (wanted.has(row.status) ? row._count._all : 0), 0);
+    };
+    // Expedientes importados pueden registrar la activación antes del alta capturada; se excluyen del promedio.
+    const durations = activated
+      .map((matter) => (matter.activatedAt!.getTime() - matter.createdAt.getTime()) / 86_400_000)
+      .filter((days) => days >= 0);
+    const averageDaysToActivation = durations.length
+      ? Math.round(durations.reduce((total, days) => total + days, 0) / durations.length * 10) / 10
       : null;
-    const alerts = matters
+    const alerts = renewalCandidates
       .filter((matter) => (
         matter.renewal
         && matter.renewal.level !== 'NONE'
@@ -121,14 +172,14 @@ export class MattersService {
     return {
       asOf: asOf.toISOString(),
       metrics: {
-        open: matters.filter((matter) => !FINISHED_STATUSES.has(matter.status)).length,
-        integration: matters.filter((matter) => INTEGRATION_STATUSES.has(matter.status)).length,
-        signature: matters.filter((matter) => matter.status === MatterStatus.SIGNATURE).length,
-        review: matters.filter((matter) => matter.status === MatterStatus.REVIEW).length,
-        approval: matters.filter((matter) => matter.status === MatterStatus.APPROVAL).length,
-        active: matters.filter((matter) => matter.status === MatterStatus.ACTIVE).length,
-        termination: matters.filter((matter) => matter.status === MatterStatus.TERMINATION).length,
-        closed: matters.filter((matter) => matter.status === MatterStatus.CLOSED).length,
+        open: countOf(Object.values(MatterStatus).filter((status) => !FINISHED_STATUSES.has(status))),
+        integration: countOf(INTEGRATION_STATUSES),
+        signature: countOf([MatterStatus.SIGNATURE]),
+        review: countOf([MatterStatus.REVIEW]),
+        approval: countOf([MatterStatus.APPROVAL]),
+        active: countOf([MatterStatus.ACTIVE]),
+        termination: countOf([MatterStatus.TERMINATION]),
+        closed: countOf([MatterStatus.CLOSED]),
         renewalWindow: alerts.length,
         expired: alerts.filter((alert) => alert.renewal.level === 'EXPIRED').length,
         averageDaysToActivation,

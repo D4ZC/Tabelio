@@ -90,7 +90,7 @@ describe('MCP operation catalog', () => {
       .map((tool) => tool.name)).toContain('despacho_tasks_pending_summary');
   });
   it('covers every application operation except health and credential lifecycle', () => {
-    expect(catalog).toHaveLength(134);
+    expect(catalog).toHaveLength(135);
     expect(new Set(catalog.map((operation) => operation.name)).size).toBe(catalog.length);
     expect(catalog.some((operation) => operation.name === 'despacho_auth_me')).toBe(true);
     expect(catalog.some((operation) => operation.handlerName === 'login')).toBe(false);

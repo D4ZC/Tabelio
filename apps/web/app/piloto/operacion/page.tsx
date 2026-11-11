@@ -54,7 +54,7 @@ export default function PilotOperationsPage() {
       const [operations, availableAssignees, availableMatters] = await Promise.all([
         apiFetch<PilotOperations>('/pilot/operations'),
         apiFetch<TaskAssignee[]>('/tasks/assignees'),
-        apiFetch<MatterSummary[]>('/matters'),
+        apiFetch<MatterSummary[]>('/matters?view=options'),
       ]);
       setData(operations);
       setAssignees(availableAssignees);

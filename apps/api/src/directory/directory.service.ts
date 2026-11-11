@@ -20,6 +20,23 @@ export class DirectoryService {
     });
   }
 
+  /** Versión ligera para selectores: con miles de personas el listado completo pesa varios MB. */
+  listPeopleOptions(user: AuthenticatedUser) {
+    return this.prisma.person.findMany({
+      where: { organizationId: user.organizationId },
+      select: { id: true, legalName: true, type: true },
+      orderBy: { legalName: 'asc' },
+    });
+  }
+
+  listPropertyOptions(user: AuthenticatedUser) {
+    return this.prisma.property.findMany({
+      where: { organizationId: user.organizationId },
+      select: { id: true, displayName: true, city: true, state: true },
+      orderBy: { displayName: 'asc' },
+    });
+  }
+
   async createPerson(user: AuthenticatedUser, dto: CreatePersonDto) {
     const duplicate = await this.prisma.person.findFirst({
       where: {
