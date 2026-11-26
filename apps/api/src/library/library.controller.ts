@@ -1,4 +1,5 @@
-import { Body, Controller, Get, Param, Post, Query, StreamableFile } from '@nestjs/common';
+import { Body, Controller, Get, Header, Param, Post, Query, StreamableFile } from '@nestjs/common';
+import { PREVIEW_SECURITY_HEADERS, previewFile } from '../documents/preview/document-preview.service';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { RequirePermissions } from '../auth/permissions.decorator';
@@ -34,6 +35,15 @@ export class LibraryController {
       disposition: `attachment; filename*=UTF-8''${encodedName}`,
       length: sizeBytes,
     });
+  }
+
+  @Get(':id/preview')
+  @RequirePermissions('DOCUMENT_READ')
+  @Header('Content-Security-Policy', PREVIEW_SECURITY_HEADERS['Content-Security-Policy'])
+  @Header('X-Content-Type-Options', PREVIEW_SECURITY_HEADERS['X-Content-Type-Options'])
+  @Header('Cache-Control', PREVIEW_SECURITY_HEADERS['Cache-Control'])
+  async preview(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+    return previewFile(await this.library.preview(user, id));
   }
 
   @Post(':id/attach')

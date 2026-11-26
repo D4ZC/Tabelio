@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Header,
   Param,
   Patch,
   Post,
@@ -17,6 +18,7 @@ import type { AuthenticatedUser } from '../auth/auth.types';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { RequirePermissions } from '../auth/permissions.decorator';
 import { DocumentsService } from './documents.service';
+import { PREVIEW_SECURITY_HEADERS, previewFile } from './preview/document-preview.service';
 import { GenerateAgreementDraftDto } from './dto/generate-agreement-draft.dto';
 import { UploadDocumentDto } from './dto/upload-document.dto';
 import { GenerateLeaseDraftDto } from './dto/generate-lease-draft.dto';
@@ -309,12 +311,11 @@ export class DocumentsController {
 
   @Get('documents/:id/preview')
   @RequirePermissions('DOCUMENT_READ')
+  @Header('Content-Security-Policy', PREVIEW_SECURITY_HEADERS['Content-Security-Policy'])
+  @Header('X-Content-Type-Options', PREVIEW_SECURITY_HEADERS['X-Content-Type-Options'])
+  @Header('Cache-Control', PREVIEW_SECURITY_HEADERS['Cache-Control'])
   async preview(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
-    const { document, stream } = await this.documents.preview(user, id);
-    return new StreamableFile(stream, {
-      type: document.mimeType,
-      disposition: `inline; filename*=UTF-8''${encodeURIComponent(document.originalName)}`,
-      length: document.sizeBytes,
-    });
+    const { content } = await this.documents.preview(user, id);
+    return previewFile(content);
   }
 }

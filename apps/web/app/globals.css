@@ -24,6 +24,22 @@
 .document-delete-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; }
 .document-delete-dialog .document-delete-confirm { color: white; background: var(--danger); }
 
+/* Vista previa rápida de archivos */
+.file-preview-dialog { width: min(1100px, calc(100vw - 32px)); height: calc(100vh - 48px); max-height: none; padding: 0; color: var(--ink); background: var(--paper); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow); overflow: hidden; }
+.file-preview-dialog[open] { display: grid; grid-template-rows: auto minmax(0, 1fr); }
+.file-preview-dialog::backdrop { background: rgba(23, 33, 28, .6); }
+.file-preview-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+.file-preview-header > div:first-child { min-width: 0; }
+.file-preview-header h2 { margin: 2px 0 0; font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.file-preview-body { min-height: 0; display: grid; place-items: center; background: var(--canvas); overflow: auto; }
+.file-preview-body iframe { width: 100%; height: 100%; border: 0; background: white; }
+.file-preview-body img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.file-preview-body video { max-width: 100%; max-height: 100%; }
+.file-preview-text { align-self: stretch; justify-self: stretch; margin: 0; padding: 18px 22px; background: white; font-size: 12px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; overflow: auto; }
+.file-preview-state { display: grid; gap: 8px; max-width: 420px; padding: 24px; text-align: center; color: var(--muted); font-size: 13px; line-height: 1.5; }
+.file-preview-state strong { color: var(--ink); font-size: 15px; }
+@media (max-width: 720px) { .file-preview-dialog { width: 100vw; height: 100vh; border-radius: 0; } .file-preview-header { flex-wrap: wrap; } }
+
 /* MVP 6 · aceptación y lanzamiento */
 .launch-header .page-actions { align-items: center; }
 .launch-decision { display: inline-flex; align-items: center; justify-content: center; min-width: 82px; padding: 8px 12px; border-radius: 999px; font-size: 11px; font-weight: 850; letter-spacing: .04em; text-transform: uppercase; }
@@ -499,8 +515,6 @@ a.search-result:hover { background: #fafcf9; }
 .diff-row > div:last-child { background: #edf7f0; }
 .diff-row small { color: var(--muted); font-size: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; }
 .diff-row p { margin: 5px 0 0; font-size: 10px; line-height: 1.45; overflow-wrap: anywhere; white-space: pre-wrap; }
-.pdf-preview-panel { overflow: hidden; }
-.pdf-preview-panel iframe { display: block; width: 100%; min-height: 720px; border: 1px solid var(--line); border-radius: 10px; background: var(--canvas); }
 .portal-page { min-height: 100vh; background: var(--canvas); }
 .portal-header { min-height: 74px; padding: 17px clamp(20px, 6vw, 80px); display: flex; align-items: center; justify-content: space-between; gap: 20px; color: white; background: var(--forest); }
 .portal-header .brand { padding: 0; }

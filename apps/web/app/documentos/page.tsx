@@ -4,7 +4,9 @@ import Link from 'next/link';
 import { FormEvent, useEffect, useState } from 'react';
 import { AppShell } from '@/components/app-shell';
 import { DeleteDocumentButton } from '@/components/delete-document-button';
+import { FilePreviewDialog, type FilePreviewTarget } from '@/components/file-preview-dialog';
 import { apiFetch, downloadFromApi } from '@/lib/api';
+import { canPreview } from '@/lib/file-preview';
 import type {
   DocumentValidityDashboard,
   DocumentValidityStatus,
@@ -38,6 +40,7 @@ export default function DocumentsPage() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [preview, setPreview] = useState<FilePreviewTarget>();
   const [notice, setNotice] = useState('');
 
   function queryString(targetPage = page) {
@@ -131,7 +134,7 @@ export default function DocumentsPage() {
             <label>Vencimiento<input name="expiresAt" type="date" defaultValue={document.expiresAt?.slice(0, 10)} /></label>
             <button className="button secondary" disabled={busy}>Guardar fechas</button>
           </form> : <div className="document-validity-dates"><small>Emisión</small><strong>{document.issuedAt ? new Date(document.issuedAt).toLocaleDateString('es-MX', { timeZone: 'UTC' }) : '—'}</strong><small>Vencimiento</small><strong>{document.expiresAt ? new Date(document.expiresAt).toLocaleDateString('es-MX', { timeZone: 'UTC' }) : '—'}</strong></div>}
-          <div className="document-center-actions">{document.matter && <Link className="link-button" href={`/expedientes/${document.matter.id}`}>Abrir expediente</Link>}<button type="button" className="link-button" onClick={() => void download(document.id, document.originalName)}>Descargar</button>{canManage && <DeleteDocumentButton document={document} matterStatus={document.matter?.status} disabled={busy} onBusyChange={setBusy} onError={setError} onDeleted={async () => {
+          <div className="document-center-actions">{document.matter && <Link className="link-button" href={`/expedientes/${document.matter.id}`}>Abrir expediente</Link>}{canPreview(document.mimeType, document.originalName) && <button type="button" className="link-button" onClick={() => setPreview({ path: `/documents/${document.id}/preview`, name: document.originalName, mimeType: document.mimeType, onDownload: () => download(document.id, document.originalName) })}>Vista previa</button>}<button type="button" className="link-button" onClick={() => void download(document.id, document.originalName)}>Descargar</button>{canManage && <DeleteDocumentButton document={document} matterStatus={document.matter?.status} disabled={busy} onBusyChange={setBusy} onError={setError} onDeleted={async () => {
             await load(dashboard.documents.length === 1 && page > 1 ? page - 1 : page);
             setNotice('Archivo eliminado definitivamente. La operación quedó registrada en la bitácora.');
           }} />}</div>
@@ -139,5 +142,6 @@ export default function DocumentsPage() {
       </div>}
       {dashboard && dashboard.pagination.totalPages > 1 && <div className="audit-pagination"><button className="button secondary" disabled={loading || page <= 1} onClick={() => void load(page - 1)}>← Anterior</button><span>{(page - 1) * dashboard.pagination.pageSize + 1}–{Math.min(page * dashboard.pagination.pageSize, dashboard.pagination.total)} de {dashboard.pagination.total}</span><button className="button secondary" disabled={loading || page >= dashboard.pagination.totalPages} onClick={() => void load(page + 1)}>Siguiente →</button></div>}
     </section>
+    <FilePreviewDialog target={preview} onClose={() => setPreview(undefined)} />
   </AppShell>;
 }

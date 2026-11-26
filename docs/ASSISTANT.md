@@ -30,6 +30,25 @@ ASSISTANT_MAX_PENDING_ACTIONS_PER_USER=3
 ASSISTANT_RATE_LIMIT_PER_MINUTE=12
 ```
 
+### Usar Claude (Anthropic)
+
+```dotenv
+ASSISTANT_ENABLED=true
+ASSISTANT_PROVIDER=anthropic
+ASSISTANT_API_BASE_URL=https://api.anthropic.com
+ASSISTANT_API_KEY=sk-ant-...
+ASSISTANT_MODEL=claude-opus-5-5
+ASSISTANT_EFFORT=medium        # low | medium | high | xhigh | max
+```
+
+Con `ASSISTANT_PROVIDER=anthropic` la API usa el SDK oficial `@anthropic-ai/sdk` y la Messages API de Claude. El adaptador `apps/api/src/assistant/anthropic-provider.ts` traduce el formato interno (estilo Responses) en ambos sentidos, de modo que el asistente, la lectura de identificaciones, los adjuntos y los análisis no cambian. Detalles:
+
+- `ASSISTANT_API_KEY_HEADER`, `ASSISTANT_API_KEY_SCHEME` y `ASSISTANT_RESPONSES_PATH` no se usan con Claude.
+- Si `ASSISTANT_MODEL` no empieza con `claude-` (por ejemplo `global-models` de IBM), se usa `claude-opus-5-5`.
+- Los turnos del asistente se reenvían con sus bloques originales (incluido el razonamiento firmado) en cada ronda de herramientas; las herramientas se ejecutan de una en una.
+- Se activa la caché automática del prefijo y el respaldo del servidor ante rechazos de política (`fallbacks: "default"`, beta `server-side-fallback-2026-07-01`).
+- El SDK no reintenta por su cuenta: cada llamada física queda registrada como intento en el consumo de IA. Los tokens de caché se suman a `inputTokens` y los leídos se informan como tokens en caché. Para estimar costos configura la tarifa del modelo en `AI_USAGE_PRICING_JSON` ([PRESUPUESTO_IA.md](PRESUPUESTO_IA.md)).
+
 `ASSISTANT_API_KEY` es exclusivamente del backend. No debe guardarse en una variable `NEXT_PUBLIC_*`, enviarse al navegador, registrarse en logs ni incorporarse a una imagen de contenedor. No se reutilizan credenciales genéricas de OpenAI como respaldo, porque la URL configurada puede pertenecer a un tercero. Una clave pegada anteriormente en un chat, ticket o log debe rotarse antes de usarla.
 
 La activación siempre es explícita: si `ASSISTANT_ENABLED` falta, el asistente permanece deshabilitado. El ejemplo local `.env.example` mantiene `ASSISTANT_ENABLED=false` para que el contenedor de desarrollo pueda iniciar sin un secreto. Después de instalar una clave nueva, confirmar el modelo y realizar la prueba mínima del proveedor, cambia el valor a `true`. El ejemplo de piloto lo deja habilitado y `pilot-deploy.sh` rechaza cualquier valor `CHANGE_ME` antes de desplegar.

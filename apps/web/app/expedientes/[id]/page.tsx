@@ -8,7 +8,9 @@ import { DeleteDocumentButton } from '@/components/delete-document-button';
 import { StatusPill } from '@/components/status-pill';
 import { MatterInsights } from '@/components/matter-insights';
 import { DocumentInsights } from '@/components/document-insights';
-import { apiFetch, blobFromApi, downloadFromApi } from '@/lib/api';
+import { apiFetch, downloadFromApi } from '@/lib/api';
+import { canPreview } from '@/lib/file-preview';
+import { FilePreviewDialog, type FilePreviewTarget } from '@/components/file-preview-dialog';
 import { IDENTITY_DOCUMENT_TYPES } from '@/lib/identity-review';
 import type { InsightSettings } from '@/lib/insights';
 import type {
@@ -132,7 +134,7 @@ export default function MatterPage() {
   const [comparison, setComparison] = useState<DocumentComparison>();
   const [clauseCatalog, setClauseCatalog] = useState<Clause[]>([]);
   const [clauseChoices, setClauseChoices] = useState<Record<string, string>>({});
-  const [pdfPreview, setPdfPreview] = useState<{ documentId: string; name: string; url: string }>();
+  const [preview, setPreview] = useState<FilePreviewTarget & { documentId: string }>();
   const [portalInvitations, setPortalInvitations] = useState<PortalInvitation[]>([]);
   const [portalLink, setPortalLink] = useState('');
   const [taskAssignees, setTaskAssignees] = useState<TaskAssignee[]>([]);
@@ -156,10 +158,6 @@ export default function MatterPage() {
       setInsightSettingsError('');
     }).catch(() => setInsightSettingsError('No se pudo verificar la disponibilidad de IA.'));
   }, []);
-
-  useEffect(() => () => {
-    if (pdfPreview) URL.revokeObjectURL(pdfPreview.url);
-  }, [pdfPreview]);
 
   const load = async () => {
     try {
@@ -470,17 +468,15 @@ export default function MatterPage() {
     }
   }
 
-  async function previewDocument(documentId: string, name: string) {
-    setBusy(true); setError('');
-    try {
-      const blob = await blobFromApi(`/documents/${documentId}/preview`);
-      setPdfPreview((current) => {
-        if (current) URL.revokeObjectURL(current.url);
-        return { documentId, name, url: URL.createObjectURL(blob) };
-      });
-    } catch (cause) {
-      setError((cause as Error).message);
-    } finally { setBusy(false); }
+  function previewDocument(documentId: string, name: string, mimeType?: string) {
+    setError('');
+    setPreview({
+      documentId,
+      path: `/documents/${documentId}/preview`,
+      name,
+      mimeType,
+      onDownload: () => downloadDocument(documentId),
+    });
   }
 
   async function generatePdfPreview(documentId: string) {
@@ -491,9 +487,10 @@ export default function MatterPage() {
         { method: 'POST' },
       );
       await load();
-      await previewDocument(document.id, document.originalName);
+      previewDocument(document.id, document.originalName, 'application/pdf');
     } catch (cause) {
       setError((cause as Error).message);
+    } finally {
       setBusy(false);
     }
   }
@@ -1023,8 +1020,8 @@ export default function MatterPage() {
                     <span className={`tag${document.invalidatedAt ? ' invalidated' : !document.isCurrentVersion ? ' historical' : ''}`}>{document.invalidatedAt ? 'Invalidado' : !document.isCurrentVersion ? 'Histórica' : document.type === 'DRAFT_CONTRACT' ? lastReview ? reviewDecisionLabels[lastReview.decision] : pdfDerivative ? 'PDF verificado' : 'PDF pendiente' : document.type === 'DRAFT_CONTRACT_PDF' ? 'Derivado inmutable' : document.extractionStatus === 'NOT_REQUESTED' ? 'Captura manual' : document.extractionStatus}</span>
                     {document.type === 'DRAFT_CONTRACT' && document.version > 1 && <button type="button" className="link-button" disabled={busy} onClick={() => void compareDocument(document.id)}>Comparar anterior</button>}
                     {document.type === 'DRAFT_CONTRACT' && !pdfDerivative && canAdvance && <button type="button" className="link-button" disabled={busy} onClick={() => void generatePdfPreview(document.id)}>Generar PDF</button>}
-                    {document.type === 'DRAFT_CONTRACT' && pdfDerivative && <button type="button" className="link-button" disabled={busy} onClick={() => void previewDocument(pdfDerivative.id, pdfDerivative.originalName)}>Vista previa</button>}
-                    {document.mimeType === 'application/pdf' && <button type="button" className="link-button" disabled={busy} onClick={() => void previewDocument(document.id, document.originalName)}>Vista previa</button>}
+                    {document.type === 'DRAFT_CONTRACT' && pdfDerivative && <button type="button" className="link-button" disabled={busy} onClick={() => previewDocument(pdfDerivative.id, pdfDerivative.originalName, pdfDerivative.mimeType)}>Vista previa</button>}
+                    {!pdfDerivative && canPreview(document.mimeType, document.originalName) && <button type="button" className="link-button" onClick={() => previewDocument(document.id, document.originalName, document.mimeType)}>Vista previa</button>}
                     {canManageChecklist && !document.invalidatedAt && uploadableDocumentTypes.some(([type]) => type === document.type) && <button type="button" className="link-button" disabled={busy} onClick={() => setClassificationDraft({ documentId: document.id, type: document.type, personId: document.personId ?? '', propertyId: document.propertyId ?? '' })}>Corregir clasificación</button>}
                     {canManageChecklist && !document.invalidatedAt && uploadableDocumentTypes.some(([type]) => type === document.type) && document.extractionStatus !== 'PROCESSING' && <select className="document-reading-action" aria-label={`Lectura de ${document.originalName}`} disabled={busy} value="" onChange={(event) => { if (event.target.value) void requestDocumentExtraction(document.id, event.target.value as 'local' | 'ai' | 'manual'); }}><option value="" disabled>Leer o capturar…</option><option value="local">Leer localmente (sin IA)</option>{extractionSettings?.enabled && IDENTITY_DOCUMENT_TYPES.includes(document.type) && <option value="ai">Leer con IA</option>}<option value="manual">Capturar manualmente</option></select>}
                     {canManageChecklist && !document.invalidatedAt && ['MANUAL_REVIEW', 'PROCESSING'].includes(document.extractionStatus) && <button type="button" className="link-button" disabled={busy} onClick={() => router.push(`/extracciones?documentId=${encodeURIComponent(document.id)}`)}>Revisar extracción</button>}
@@ -1034,7 +1031,7 @@ export default function MatterPage() {
                     {canManageChecklist && <DeleteDocumentButton document={document} matterStatus={matter.status} disabled={busy} onBusyChange={setBusy} onError={setError} onDeleted={async (documentId) => {
                       setIdentityExtractions((current) => current.filter((reading) => reading.documentId !== documentId));
                       setClassificationDraft((current) => current?.documentId === documentId ? undefined : current);
-                      setPdfPreview((current) => current?.documentId === documentId ? undefined : current);
+                      setPreview((current) => current?.documentId === documentId ? undefined : current);
                       await load();
                       setDocumentNotice('Archivo eliminado definitivamente. La operación quedó registrada en la bitácora.');
                     }} />}
@@ -1071,11 +1068,6 @@ export default function MatterPage() {
               {matter.documents.length === 0 && <div className="empty"><strong>Sin documentos</strong><span>Carga la primera evidencia del expediente.</span></div>}
             </div>
           </section>
-
-          {pdfPreview && <section className="card pdf-preview-panel">
-            <div className="section-heading"><div><h2>Vista previa PDF</h2><p>{pdfPreview.name}</p></div><div className="heading-actions"><button type="button" className="link-button" onClick={() => void downloadDocument(pdfPreview.documentId)}>Descargar</button><button type="button" className="link-button" onClick={() => setPdfPreview(undefined)}>Cerrar</button></div></div>
-            <iframe src={pdfPreview.url} title={`Vista previa de ${pdfPreview.name}`} />
-          </section>}
 
           {comparison && <section className="card comparison-panel">
             <div className="section-heading"><div><h2>Comparación de versiones</h2><p>v{comparison.previousDocument.version} contra v{comparison.currentDocument.version}, por párrafo.</p></div><button type="button" className="link-button" onClick={() => setComparison(undefined)}>Cerrar</button></div>
@@ -1210,6 +1202,7 @@ export default function MatterPage() {
       </div>}
 
       {tab === 'activity' && <section className="card timeline"><div className="section-heading"><div><h2>Bitácora</h2><p>Registro cronológico e inmutable de acciones.</p></div></div>{matter.auditEvents.map((event) => <article key={event.id}><span></span><div><strong>{event.action.replaceAll('_', ' ')}</strong><small>{event.actor?.displayName ?? 'Sistema'} · {new Date(event.createdAt).toLocaleString('es-MX')}</small></div></article>)}</section>}
+      <FilePreviewDialog target={preview} onClose={() => setPreview(undefined)} />
     </AppShell>
   );
 }

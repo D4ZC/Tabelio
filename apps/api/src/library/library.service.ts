@@ -5,6 +5,8 @@ import {
   HttpException,
   Injectable,
   NotFoundException,
+  Optional,
+  ServiceUnavailableException,
 } from '@nestjs/common';
 import { DocumentType, MatterStatus, Prisma } from '@despacho/database';
 import { hasPermission, type Permission } from '@despacho/domain';
@@ -15,6 +17,7 @@ import { AuditService } from '../audit/audit.service';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { DocumentsService } from '../documents/documents.service';
 import { ObjectStorageService } from '../documents/object-storage.service';
+import { DocumentPreviewService } from '../documents/preview/document-preview.service';
 import { PrismaService } from '../prisma/prisma.service';
 import type { AttachLibraryDocumentDto } from './dto/attach-library-document.dto';
 import type { LibraryQueryDto } from './dto/library-query.dto';
@@ -148,6 +151,7 @@ export class LibraryService {
     private readonly storage: ObjectStorageService,
     private readonly documents: DocumentsService,
     private readonly audit: AuditService,
+    @Optional() private readonly previews?: DocumentPreviewService,
   ) {}
 
   async list(user: AuthenticatedUser, query: LibraryQueryDto) {
@@ -237,6 +241,29 @@ export class LibraryService {
       orderBy: [{ documentTypeLabel: 'asc' }, { id: 'asc' }],
     });
     return { ...this.summary(document), text: document.text, relatedDocuments: relatedDocuments.map((row) => this.summary(row)) };
+  }
+
+  async preview(user: AuthenticatedUser, id: string) {
+    this.requirePermission(user, 'DOCUMENT_READ');
+    if (!this.previews) throw new ServiceUnavailableException('La vista previa no está disponible');
+    const document = await this.findInternal(user.organizationId, id);
+    // render() rechaza los tipos sin vista previa antes de dejar rastro de consulta.
+    const content = await this.previews.render({
+      cacheKey: `library:${document.id}:${document.sha256}`,
+      mimeType: document.mimeType,
+      fileName: this.fileName(document),
+      sizeBytes: document.sizeBytes,
+      open: () => this.storage.open(document.objectKey),
+    });
+    await this.audit.record({
+      organizationId: user.organizationId,
+      actorUserId: user.userId,
+      action: 'LIBRARY_DOCUMENT_PREVIEWED',
+      entityType: 'LibraryDocument',
+      entityId: document.id,
+      payload: { collectionId: document.collectionId, externalId: document.externalId },
+    });
+    return content;
   }
 
   async download(user: AuthenticatedUser, id: string) {

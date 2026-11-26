@@ -55,9 +55,10 @@ export async function downloadFromApi(path: string, fileName: string) {
   URL.revokeObjectURL(url);
 }
 
-export async function blobFromApi(path: string) {
+export async function blobFromApi(path: string, signal?: AbortSignal) {
   const response = await fetch(`${API_URL}${path}`, {
     credentials: 'include',
+    signal,
   });
   if (!response.ok) {
     const payload = await response.json().catch(() => null);

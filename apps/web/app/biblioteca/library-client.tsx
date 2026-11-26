@@ -3,7 +3,9 @@
 import Link from 'next/link';
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import { AppShell } from '@/components/app-shell';
+import { FilePreviewDialog, type FilePreviewTarget } from '@/components/file-preview-dialog';
 import { apiFetch, downloadFromApi } from '@/lib/api';
+import { canPreview } from '@/lib/file-preview';
 import { libraryLabel, summarizeLibraryAttachment } from '@/lib/library';
 import type { LibraryAttachResponse, LibraryDetail, LibraryDocument, LibraryFacet, LibraryResponse } from '@/lib/library';
 import type { MatterSummary } from '@/lib/types';
@@ -56,6 +58,7 @@ export function LibraryClient({ initialMatterId, initialDocumentId }: { initialM
   const [attachError, setAttachError] = useState('');
   const [downloading, setDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState('');
+  const [preview, setPreview] = useState<FilePreviewTarget>();
   const detailHeading = useRef<HTMLHeadingElement>(null);
 
   const query = new URLSearchParams({ page: String(page), pageSize: '15' });
@@ -221,7 +224,7 @@ export function LibraryClient({ initialMatterId, initialDocumentId }: { initialM
           <dl className="library-metadata"><div><dt>Origen</dt><dd>{detail.source}</dd></div><div><dt>Materia</dt><dd>{facets?.legalFamilies.find((item) => item.value === detail.legalFamily)?.label ?? libraryLabel(detail.legalFamily)}</dd></div><div><dt>Variante</dt><dd>{facets?.variants.find((item) => item.value === detail.variant)?.label ?? libraryLabel(detail.variant)}</dd></div><div><dt>Conjunto</dt><dd>{detail.packageLabel}</dd></div></dl>
           <p className="library-source-path">Ubicación original: {detail.originalPath}</p>
           {(detail.duplicateOf || detail.textEquivalentTo) && <p className="library-equivalence">{detail.duplicateOf ? 'Existe otra copia idéntica en la biblioteca. Se conserva su procedencia.' : 'El texto coincide con otro documento; el formato puede variar.'}</p>}
-          <div className="library-detail-actions"><button type="button" className="button secondary" disabled={downloading} onClick={() => void download()}>{downloading ? 'Descargando…' : 'Descargar Word original'}</button><small>{Math.max(1, Math.round(detail.sizeBytes / 1024))} KB</small></div>
+          <div className="library-detail-actions">{canPreview(detail.mimeType, detail.originalPath) && <button type="button" className="button primary" onClick={() => setPreview({ path: `/library/documents/${encodeURIComponent(detail.id)}/preview`, name: detail.title, mimeType: detail.mimeType, onDownload: download })}>Vista previa</button>}<button type="button" className="button secondary" disabled={downloading} onClick={() => void download()}>{downloading ? 'Descargando…' : 'Descargar original'}</button><small>{Math.max(1, Math.round(detail.sizeBytes / 1024))} KB</small></div>
           {downloadError && <p className="alert error" role="alert">{downloadError}</p>}
 
           <ReviewList title="Observaciones del análisis" values={detail.review.notes} />
@@ -247,5 +250,5 @@ export function LibraryClient({ initialMatterId, initialDocumentId }: { initialM
         </>}
       </section>
     </div>
-  </div></AppShell>;
+  </div><FilePreviewDialog target={preview} onClose={() => setPreview(undefined)} /></AppShell>;
 }

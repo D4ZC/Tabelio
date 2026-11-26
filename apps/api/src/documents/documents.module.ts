@@ -14,6 +14,7 @@ import { AssistantProviderService } from '../assistant/assistant-provider.servic
 import { AiDocumentExtractionService } from './extraction/ai-document-extraction.service';
 import { LocalDocumentReaderService } from './extraction/local-document-reader.service';
 import { DocumentReadingService } from './extraction/document-reading.service';
+import { DocumentPreviewService } from './preview/document-preview.service';
 
 @Module({
   imports: [TasksModule],
@@ -29,10 +30,11 @@ import { DocumentReadingService } from './extraction/document-reading.service';
     DocumentReadingService,
     ManualSignatureProviderService,
     LibreOfficeDocumentConversionService,
+    DocumentPreviewService,
     { provide: DOCUMENT_EXTRACTION, useExisting: DocumentReadingService },
     { provide: SIGNATURE_PROVIDER, useExisting: ManualSignatureProviderService },
     { provide: DOCUMENT_CONVERSION, useExisting: LibreOfficeDocumentConversionService },
   ],
-  exports: [ObjectStorageService, DocumentsService, LocalDocumentReaderService],
+  exports: [ObjectStorageService, DocumentsService, LocalDocumentReaderService, DocumentPreviewService],
 })
 export class DocumentsModule {}

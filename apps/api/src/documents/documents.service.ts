@@ -35,6 +35,7 @@ import type { UploadDocumentDto } from './dto/upload-document.dto';
 import type { GenerateAgreementDraftDto } from './dto/generate-agreement-draft.dto';
 import type { GenerateLeaseDraftDto } from './dto/generate-lease-draft.dto';
 import { DocxTemplateService } from './docx-template.service';
+import { DocumentPreviewService } from './preview/document-preview.service';
 import {
   DOCUMENT_EXTRACTION,
   type DocumentExtractionPort,
@@ -112,6 +113,7 @@ export class DocumentsService {
     private readonly notifications: NotificationsService,
     private readonly tasks: TasksService,
     @Optional() private readonly usage?: AiUsageService,
+    @Optional() private readonly previews?: DocumentPreviewService,
   ) {}
 
   async upload(
@@ -1192,14 +1194,20 @@ export class DocumentsService {
   }
 
   async preview(user: AuthenticatedUser, documentId: string) {
+    if (!this.previews) throw new ServiceUnavailableException('La vista previa no está disponible');
     const document = await this.prisma.document.findFirst({
       where: { id: documentId, organizationId: user.organizationId },
     });
     if (!document) throw new NotFoundException('Documento no encontrado');
-    if (document.mimeType !== 'application/pdf') {
-      throw new BadRequestException('La vista previa sólo está disponible para archivos PDF');
-    }
-    const stream = await this.storage.open(document.objectKey);
+    const source = {
+      cacheKey: `document:${document.id}:${document.checksum}`,
+      mimeType: document.mimeType,
+      fileName: document.originalName,
+      sizeBytes: document.sizeBytes,
+      open: () => this.storage.open(document.objectKey),
+    };
+    // render() rechaza los tipos sin vista previa antes de dejar rastro de consulta.
+    const content = await this.previews.render(source);
     await this.audit.record({
       organizationId: user.organizationId,
       matterId: document.matterId ?? undefined,
@@ -1208,7 +1216,7 @@ export class DocumentsService {
       entityType: 'Document',
       entityId: document.id,
     });
-    return { document, stream };
+    return { document, content };
   }
 
   extractionSettings() {

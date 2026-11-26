@@ -25,19 +25,37 @@ export class LibreOfficeDocumentConversionService implements DocumentConversionP
       : 60_000;
   }
 
-  async convertDocxToPdf(input: {
+  convertDocxToPdf(input: {
     documentId: string;
     buffer: Buffer;
   }): Promise<DocumentConversionResult> {
+    return this.convert(input.buffer, 'docx', 'pdf:writer_pdf_Export');
+  }
+
+  convertToPdf(input: {
+    documentId: string;
+    buffer: Buffer;
+    extension: string;
+  }): Promise<DocumentConversionResult> {
+    const extension = input.extension.toLowerCase();
+    if (!/^[a-z0-9]{1,5}$/.test(extension)) {
+      return Promise.reject(new DocumentConversionFailedError('Formato de entrada no válido'));
+    }
+    // Sin filtro explícito LibreOffice elige el exportador PDF adecuado (Writer, Calc o Impress).
+    return this.convert(input.buffer, extension, 'pdf');
+  }
+
+  private async convert(source: Buffer, extension: string, target: string): Promise<DocumentConversionResult> {
     const directory = await mkdtemp(join(tmpdir(), 'despacho-pdf-'));
     const profileDirectory = join(directory, 'libreoffice-profile');
-    const inputPath = join(directory, `${input.documentId}.docx`);
-    const outputPath = join(directory, `${input.documentId}.pdf`);
+    // Nombre fijo: el identificador del documento nunca forma parte de una ruta del sistema.
+    const inputPath = join(directory, `entrada.${extension}`);
+    const outputPath = join(directory, 'entrada.pdf');
 
     try {
       await mkdir(profileDirectory);
-      await writeFile(inputPath, input.buffer, { flag: 'wx' });
-      await this.runLibreOffice(inputPath, directory, profileDirectory);
+      await writeFile(inputPath, source, { flag: 'wx' });
+      await this.runLibreOffice(inputPath, directory, profileDirectory, target);
       const buffer = await readFile(outputPath).catch(() => undefined);
       if (!buffer?.subarray(0, 5).equals(Buffer.from('%PDF-'))) {
         throw new DocumentConversionFailedError('LibreOffice no produjo un PDF válido');
@@ -48,13 +66,13 @@ export class LibreOfficeDocumentConversionService implements DocumentConversionP
     }
   }
 
-  private runLibreOffice(inputPath: string, outputDirectory: string, profileDirectory: string) {
+  private runLibreOffice(inputPath: string, outputDirectory: string, profileDirectory: string, target: string) {
     return new Promise<void>((resolve, reject) => {
       const child = spawn(this.binary, [
         `-env:UserInstallation=${pathToFileURL(profileDirectory).href}`,
         '--headless',
         '--convert-to',
-        'pdf:writer_pdf_Export',
+        target,
         '--outdir',
         outputDirectory,
         inputPath,
